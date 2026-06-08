@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>BR0THER-H00D</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  background: #000;
-  color: #00ffff;
+  background: #0a0a0a;
+  color: #00ff88;
   font-family: 'Courier New', monospace;
   min-height: 100vh;
   min-height: 100dvh;
@@ -17,90 +17,277 @@ html, body {
   align-items: center;
   justify-content: center;
 }
-#app {
-  width: 100%;
-  padding: clamp(8px, 3vw, 20px);
-  box-sizing: border-box;
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.007) 2px, rgba(0,255,136,0.007) 4px);
+  pointer-events: none; z-index: 100;
 }
-pre {
-  font-family: 'Courier New', monospace;
-  font-size: clamp(8px, 2.6vw, 15px);
-  line-height: 1.5;
-  white-space: pre;
-  overflow-x: hidden;
-  width: 100%;
-  box-sizing: border-box;
+#enter-screen {
+  display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0;
+  transition: opacity 0.4s;
+  z-index: 5;
 }
-.cy { color: #00ffff; }
-.gr { color: #00ff88; }
-.yl { color: #ffff00; }
-.mg { color: #ff00ff; }
-.rd { color: #ff4444; }
-.dm { color: #555; }
-#status { margin-top: 10px; font-size: clamp(10px, 2.6vw, 14px); color: #555; word-break: break-word; }
-#menu-input-row { display: flex; align-items: center; margin-top: 8px; }
-#menu-input-row span { color: #00ffff; font-size: clamp(8px, 2.6vw, 15px); white-space: nowrap; }
+#enter-text {
+  font-size: clamp(14px, 4vw, 18px);
+  color: #00ff88;
+  letter-spacing: 2px;
+  cursor: pointer;
+  min-height: 28px;
+}
+#boot-screen {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: fixed; inset: 0;
+  padding: 40px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s;
+  z-index: 4;
+}
+#lines-wrap {
+  width: 100%; max-width: 320px;
+  margin-bottom: 32px;
+}
+.bl {
+  font-size: 11px; line-height: 2;
+  color: #00ff8866;
+  display: flex; align-items: center; gap: 10px;
+  opacity: 0; transition: opacity 0.2s;
+}
+.bl.visible { opacity: 1; }
+.bl.dim { color: #1a3328; transition: color 0.4s; }
+.tag {
+  font-size: 9px; padding: 1px 6px; border-radius: 2px;
+  min-width: 44px; text-align: center; letter-spacing: 0.5px; flex-shrink: 0;
+}
+.tag.ok    { color: #00ff88; border: 1px solid #00ff8833; }
+.tag.spawn { color: #cc88ff88; border: 1px solid #cc88ff22; }
+.tag.info  { color: #00ffff44; border: 1px solid #00ffff22; }
+.bl-text { font-size: 11px; }
+.cur {
+  display: inline-block; width: 6px; height: 11px;
+  background: #00ff88; vertical-align: middle; margin-left: 1px;
+  animation: blink 0.5s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+#bar-wrap { width: 100%; max-width: 320px; }
+#bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: #ffffff15; margin-bottom: 6px;
+}
+#bar-pct { color: #00ff8833; }
+#bar-outer { width: 100%; height: 2px; background: #1a1a1a; }
+#bar-inner { height: 100%; width: 0%; background: #00ff88; transition: width 0.25s linear; }
+
+#main-screen {
+  display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.7s;
+  padding: clamp(12px, 4vw, 32px);
+  z-index: 3;
+}
+#abox {
+  color: #00ffff;
+  font-size: clamp(8px, 2.6vw, 14px);
+  line-height: 1.55; white-space: pre;
+  overflow-x: hidden; width: 100%;
+}
+#pline {
+  color: #00ff88; font-size: clamp(10px, 2.6vw, 13px);
+  margin-top: 12px;
+  display: flex; align-items: center; gap: 4px;
+}
+#pcur {
+  display: inline-block; width: 8px; height: 13px;
+  background: #00ff88;
+  animation: blink 1s step-end infinite; vertical-align: middle;
+}
+#status {
+  margin-top: 10px;
+  font-size: clamp(10px, 2.6vw, 12px);
+  color: #555; word-break: break-word;
+  min-height: 16px;
+}
 #menu-key {
   background: transparent; border: none; outline: none;
-  color: #00ffff; font-family: 'Courier New', monospace;
-  font-size: clamp(12px, 2.6vw, 15px); width: 50px; caret-color: #00ffff;
-}
-#terminal { display: none; }
-#term-out { line-height: 1.6; font-size: clamp(8px, 2.6vw, 14px); overflow-x: hidden; }
-#term-out div { white-space: pre-wrap; word-break: break-word; }
-#term-input { display: flex; align-items: center; margin-top: 6px; }
-#term-input span { color: #00ffff; white-space: nowrap; font-size: clamp(8px, 2.6vw, 15px); }
-#tcmd {
-  background: transparent; border: none; outline: none;
-  color: #00ffff; font-family: 'Courier New', monospace;
-  font-size: clamp(12px, 2.6vw, 15px); flex: 1; caret-color: #00ffff; min-width: 0;
+  color: #00ff88; font-family: 'Courier New', monospace;
+  font-size: clamp(12px, 2.6vw, 14px);
+  width: 40px; caret-color: #00ff88;
+  position: absolute; opacity: 0;
 }
 </style>
 </head>
 <body>
-<div id="app">
 
-<div id="entry">
-<pre class="cy">
-╔══════════════════════════════════════════════╗
-║  BR0THER-H00D                                ║
-╠══════════════════════════════════════════════╣
-║                                              ║
-║  holders only. verify your $H00D below.      ║
-║                                              ║
-╠══════════════════════════════════════════════╣
-║                                              ║
-║  <span class="gr">[1]  Connect Phantom — verify $H00D</span>         ║
-║  <span class="cy">[2]  Buy $H00D on pump.fun</span>                  ║
-║                                              ║
-╚══════════════════════════════════════════════╝
-</pre>
-<div id="menu-input-row">
-  <span>  Select (0-2): </span>
-  <input id="menu-key" type="text" autofocus autocomplete="off" spellcheck="false">
-</div>
-<div id="status"></div>
+<div id="enter-screen">
+  <div id="enter-text"></div>
 </div>
 
-<div id="terminal">
-  <div id="term-out"></div>
-  <div id="term-input">
-    <span>  you › </span>
-    <input id="tcmd" type="text" autocomplete="off" spellcheck="false" onkeydown="termKey(event)">
+<div id="boot-screen">
+  <div id="lines-wrap"></div>
+  <div id="bar-wrap">
+    <div id="bar-label">
+      <span id="bar-status">loading</span>
+      <span id="bar-pct">0%</span>
+    </div>
+    <div id="bar-outer"><div id="bar-inner"></div></div>
   </div>
 </div>
 
+<div id="main-screen">
+  <div style="width:100%;max-width:460px">
+    <pre id="abox">
+╔══════════════════════════════════════════╗
+║                                          ║
+║  holders only. verify $H00D below.       ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  [1]  Connect Phantom — verify $H00D     ║
+║  [2]  Buy $H00D on pump.fun              ║
+║                                          ║
+╚══════════════════════════════════════════╝</pre>
+    <div id="pline">
+      <span>  Select (0-2):</span>
+      <span id="pcur"></span>
+      <input id="menu-key" type="text" autocomplete="off" spellcheck="false">
+    </div>
+    <div id="status"></div>
+  </div>
 </div>
+
 <script>
 const API = window.location.origin;
 let wallet = null, hoodBal = 0, hoodMint = null, minBal = 100000;
 
-document.getElementById('menu-key').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    const v = this.value.trim(); this.value = '';
-    if (v === '1') connectWallet();
-    else if (v === '2') openBuy();
+const BOOT_LINES = [
+  { tag:'ok',    text:'connecting...' },
+  { tag:'ok',    text:'$H00D ledger — mounted' },
+  { tag:'ok',    text:'wallet gate — armed' },
+  { tag:'spawn', text:'spawning Scanner       [pid 1338]' },
+  { tag:'spawn', text:'spawning WhaleTracker  [pid 1339]' },
+  { tag:'spawn', text:'spawning PumpHunter    [pid 1340]' },
+  { tag:'spawn', text:'spawning RiskManager   [pid 1341]' },
+  { tag:'info',  text:'9 agents running' },
+  { tag:'ok',    text:'collective is live.' },
+];
+
+// ── ENTER SCREEN ──────────────────────────────────────────────────────────────
+function typeEnter() {
+  const el = document.getElementById('enter-text');
+  const word = '[ enter ]';
+  let ci = 0;
+  el.innerHTML = '';
+  function t() {
+    if (ci <= word.length) {
+      el.innerHTML = word.slice(0, ci) + '<span style="display:inline-block;width:9px;height:16px;background:#00ff88;vertical-align:middle;margin-left:2px;animation:blink 0.7s step-end infinite"></span>';
+      ci++;
+      setTimeout(t, 80 + Math.random() * 40);
+    } else {
+      el.textContent = word;
+    }
   }
+  t();
+}
+
+document.getElementById('enter-text').addEventListener('click', startBoot);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const es = document.getElementById('enter-screen');
+    if (es.style.opacity !== '0') startBoot();
+    else handleMenuKey(e);
+  }
+});
+
+// ── BOOT SEQUENCE ─────────────────────────────────────────────────────────────
+function startBoot() {
+  const es = document.getElementById('enter-screen');
+  const bs = document.getElementById('boot-screen');
+  const wrap = document.getElementById('lines-wrap');
+  const bar = document.getElementById('bar-inner');
+  const pct = document.getElementById('bar-pct');
+  const bstat = document.getElementById('bar-status');
+
+  es.style.opacity = '0';
+  es.style.pointerEvents = 'none';
+  bs.style.opacity = '1';
+  bs.style.pointerEvents = 'auto';
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  pct.textContent = '0%';
+  wrap.innerHTML = '';
+
+  const rows = BOOT_LINES.map(({ tag, text }) => {
+    const div = document.createElement('div');
+    div.className = 'bl';
+    const tagEl = document.createElement('span');
+    tagEl.className = 'tag ' + tag;
+    tagEl.textContent = tag.toUpperCase();
+    const textEl = document.createElement('span');
+    textEl.className = 'bl-text';
+    div.appendChild(tagEl); div.appendChild(textEl);
+    wrap.appendChild(div);
+    return { div, textEl, text, tag };
+  });
+
+  let li = 0;
+  function nextLine() {
+    if (li >= rows.length) {
+      bar.style.transition = 'width 0.3s linear';
+      bar.style.width = '100%';
+      pct.textContent = '100%';
+      bstat.textContent = 'done';
+      setTimeout(showMain, 500);
+      return;
+    }
+    const { div, textEl, text, tag } = rows[li];
+    div.classList.add('visible');
+    const p = Math.round((li + 1) / rows.length * 100);
+    bar.style.transition = 'width 0.25s linear';
+    bar.style.width = p + '%';
+    pct.textContent = p + '%';
+    bstat.textContent = text.replace(/\[.*\]/, '').trim();
+    let ci = 0;
+    function typeChar() {
+      if (ci <= text.length) {
+        textEl.innerHTML = text.slice(0, ci) + '<span class="cur"></span>';
+        ci++;
+        setTimeout(typeChar, 22 + Math.random() * 14);
+      } else {
+        textEl.textContent = text;
+        if (li > 0) rows[li - 1].div.classList.add('dim');
+        li++;
+        setTimeout(nextLine, tag === 'spawn' ? 90 : 300);
+      }
+    }
+    typeChar();
+  }
+  setTimeout(nextLine, 300);
+}
+
+function showMain() {
+  const bs = document.getElementById('boot-screen');
+  const ms = document.getElementById('main-screen');
+  bs.style.opacity = '0';
+  bs.style.pointerEvents = 'none';
+  ms.style.opacity = '1';
+  ms.style.pointerEvents = 'auto';
+  document.getElementById('menu-key').focus();
+}
+
+// ── MENU INPUT ────────────────────────────────────────────────────────────────
+function handleMenuKey(e) {
+  if (e.key === '1') connectWallet();
+  else if (e.key === '2') openBuy();
+}
+document.getElementById('menu-key').addEventListener('keydown', function(e) {
+  if (e.key === '1') connectWallet();
+  else if (e.key === '2') openBuy();
+});
+document.getElementById('main-screen').addEventListener('click', function() {
+  document.getElementById('menu-key').focus();
 });
 
 function setStatus(msg, color) {
@@ -119,10 +306,10 @@ async function loadConfig() {
 async function connectWallet() {
   if (!window.solana?.isPhantom) { setStatus('Phantom not found — install at phantom.app', '#ff4444'); return; }
   try {
-    setStatus('connecting...', '#ffff00');
+    setStatus('connecting...', '#ffff0088');
     const resp = await window.solana.connect();
     wallet = resp.publicKey.toString();
-    setStatus(`checking $H00D for ${wallet.slice(0,6)}...${wallet.slice(-4)}`, '#ffff00');
+    setStatus(`checking $H00D for ${wallet.slice(0,6)}...${wallet.slice(-4)}`, '#ffff0088');
     const r = await fetch(`${API}/gate/check`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({wallet}) });
     const gate = await r.json();
     hoodBal = gate.balance || 0;
@@ -130,7 +317,7 @@ async function connectWallet() {
       setStatus(`✓ ${hoodBal.toLocaleString()} $H00D confirmed — entering...`, '#00ff88');
       setTimeout(enterTerminal, 700);
     } else {
-      setStatus(`✗ you have ${hoodBal.toLocaleString()} $H00D — need ${minBal.toLocaleString()} — press 2 to buy`, '#ff4444');
+      setStatus(`✗ need ${minBal.toLocaleString()} $H00D — you have ${hoodBal.toLocaleString()} — press 2 to buy`, '#ff4444');
     }
   } catch(e) { setStatus('error: ' + e.message, '#ff4444'); }
 }
@@ -140,101 +327,111 @@ function openBuy() {
 }
 
 function enterTerminal() {
-  document.getElementById('entry').style.display = 'none';
-  document.getElementById('terminal').style.display = 'block';
-  document.getElementById('tcmd').focus();
-  tp('cy','╔══════════════════════════════════════════════╗');
-  tp('cy','║  BR0THER-H00D                                ║');
-  tp('cy','╠══════════════════════════════════════════════╣');
-  tp('gr','║  ✓ access granted                            ║');
-  tp('cy','╚══════════════════════════════════════════════╝');
-  tp('dm',`  ${wallet.slice(0,6)}...${wallet.slice(-4)}  ·  ${hoodBal.toLocaleString()} $H00D`);
-  tp('dm','  type help for commands');
+  const ms = document.getElementById('main-screen');
+  ms.style.opacity = '0';
+  ms.style.pointerEvents = 'none';
+  setTimeout(() => {
+    ms.innerHTML = `<div style="width:100%;max-width:460px;padding:clamp(12px,4vw,32px)">
+      <div id="term-out" style="line-height:1.7;font-size:clamp(10px,2.6vw,13px);overflow-x:hidden"></div>
+      <div style="color:#00ff88;font-size:12px;margin-top:10px;display:flex;align-items:center;gap:4px">
+        <span>  you ›</span>
+        <input id="tcmd" type="text" autocomplete="off" spellcheck="false" style="background:transparent;border:none;outline:none;color:#00ff88;font-family:'Courier New',monospace;font-size:clamp(12px,2.6vw,13px);flex:1;caret-color:#00ff88;min-width:0">
+      </div>
+    </div>`;
+    ms.style.opacity = '1';
+    ms.style.pointerEvents = 'auto';
+    document.getElementById('tcmd').focus();
+    tp('gr','✓ access granted');
+    tp('dm',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D`);
+    tp('dm','type help for commands');
+    document.getElementById('tcmd').addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      const cmd = this.value.trim(); this.value = '';
+      if (!cmd) return;
+      tp('cy','you › ' + cmd);
+      runCmd(cmd);
+    });
+  }, 600);
 }
 
 function tp(col, text) {
   const colors = {cy:'#00ffff',gr:'#00ff88',yl:'#ffff00',mg:'#ff00ff',rd:'#ff4444',dm:'#555'};
   const d = document.getElementById('term-out');
+  if (!d) return;
   const s = document.createElement('div');
-  s.style.color = colors[col] || '#00ffff';
+  s.style.color = colors[col] || '#00ff88';
+  s.style.whiteSpace = 'pre-wrap';
+  s.style.wordBreak = 'break-word';
   s.textContent = text;
   d.appendChild(s);
   window.scrollTo(0, document.body.scrollHeight);
 }
 
-function termKey(e) {
-  if (e.key !== 'Enter') return;
-  const cmd = document.getElementById('tcmd').value.trim();
-  document.getElementById('tcmd').value = '';
-  if (!cmd) return;
-  tp('cy', `  you › ${cmd}`);
-  runCmd(cmd);
-}
-
 async function runCmd(raw) {
   const c = raw.toLowerCase().trim();
-  if (c === 'help') {
-    tp('dm','  ──────────────────────────────────────────────');
-    tp('gr','  [1]  status      — agents & portfolio');
-    tp('cy','  [2]  market      — SOL BTC ETH prices');
-    tp('cy','  [3]  trending    — coingecko trending');
-    tp('cy','  [4]  pump        — latest pump.fun');
-    tp('mg','  [5]  trades      — trade history');
-    tp('cy','  [6]  wallet      — your SOL balance');
-    tp('yl','  [7]  hood        — your $H00D balance');
-    tp('mg','  [8]  pro         — unlock PRO');
-    tp('dm','  [c]  clear  [0]  exit');
-    tp('dm','  ──────────────────────────────────────────────');
+  if (c==='help') {
+    tp('dm','──────────────────────');
+    tp('gr','[1] status   — portfolio');
+    tp('cy','[2] market   — prices');
+    tp('cy','[3] trending — coingecko');
+    tp('cy','[4] pump     — pump.fun');
+    tp('mg','[5] trades   — history');
+    tp('cy','[6] wallet   — SOL balance');
+    tp('yl','[7] hood     — $H00D balance');
+    tp('mg','[8] pro      — PRO mode');
+    tp('dm','[c] clear  [0] exit');
+    tp('dm','──────────────────────');
     return;
   }
   if (c==='clear'||c==='c') { document.getElementById('term-out').innerHTML=''; return; }
-  if (c==='exit'||c==='0') { tp('dm','  disconnecting...'); setTimeout(()=>window.close(),700); return; }
-  if (c==='hood'||c==='7') { tp('yl',`  ${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D`); return; }
+  if (c==='exit'||c==='0') { tp('dm','disconnecting...'); setTimeout(()=>window.close(),700); return; }
+  if (c==='hood'||c==='7') { tp('yl',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D`); return; }
   if (c==='pro'||c==='8') {
-    if (hoodBal>=1000000) { tp('mg','  ⚡ PRO MODE UNLOCKED'); tp('mg','  full agent collective · all signals live'); }
-    else { tp('rd',`  ✗  PRO requires 1,000,000 $H00D`); tp('rd',`     have ${hoodBal.toLocaleString()} · need ${(1000000-hoodBal).toLocaleString()} more`); tp('yl','     press 2 to buy → pump.fun'); }
+    if (hoodBal>=1000000) { tp('mg','⚡ PRO MODE UNLOCKED'); }
+    else { tp('rd',`✗ need 1,000,000 $H00D — have ${hoodBal.toLocaleString()}`); tp('yl','press 2 to buy on pump.fun'); }
     return;
   }
   if (c==='status'||c==='1') {
-    tp('dm','  fetching...');
+    tp('dm','fetching...');
     try {
       const d=await(await fetch(`${API}/status`)).json();
-      tp('dm','  ──────────────────────────────────────────────');
-      tp(d.running?'gr':'dm',`  agents     ${d.running?'● LIVE':'○ offline'}`);
-      tp('yl',`  balance    $${d.balance}`);
-      tp(d.total_pnl>=0?'gr':'rd',`  pnl        ${d.total_pnl>=0?'+':''}$${d.total_pnl}`);
-      tp('cy',`  trades     ${d.trades}`);
-      tp('dm','  ──────────────────────────────────────────────');
-    } catch(e) { tp('rd','  error: '+e.message); }
+      tp('dm','──────────────────────');
+      tp(d.running?'gr':'dm',`agents   ${d.running?'● LIVE':'○ offline'}`);
+      tp('yl',`balance  $${d.balance}`);
+      tp(d.total_pnl>=0?'gr':'rd',`pnl      ${d.total_pnl>=0?'+':''}$${d.total_pnl}`);
+      tp('cy',`trades   ${d.trades}`);
+      tp('dm','──────────────────────');
+    } catch(e) { tp('rd','error: '+e.message); }
     return;
   }
-  if (c==='market'||c==='2') { tp('dm','  fetching...'); try{const d=await(await fetch(`${API}/market/sol`)).json();tp('cy',d.text);}catch(e){tp('rd','  error: '+e.message);} return; }
-  if (c==='trending'||c==='3') { tp('dm','  fetching...'); try{const d=await(await fetch(`${API}/market/trending`)).json();tp('cy',d.text);}catch(e){tp('rd','  error: '+e.message);} return; }
-  if (c==='pump'||c==='4') { tp('dm','  fetching...'); try{const d=await(await fetch(`${API}/market/pump`)).json();tp('cy',d.text);}catch(e){tp('rd','  error: '+e.message);} return; }
+  if (c==='market'||c==='2') { tp('dm','fetching...'); try{const d=await(await fetch(`${API}/market/sol`)).json();tp('cy',d.text);}catch(e){tp('rd','error: '+e.message);} return; }
+  if (c==='trending'||c==='3') { tp('dm','fetching...'); try{const d=await(await fetch(`${API}/market/trending`)).json();tp('cy',d.text);}catch(e){tp('rd','error: '+e.message);} return; }
+  if (c==='pump'||c==='4') { tp('dm','fetching...'); try{const d=await(await fetch(`${API}/market/pump`)).json();tp('cy',d.text);}catch(e){tp('rd','error: '+e.message);} return; }
   if (c==='trades'||c==='5') {
-    tp('dm','  fetching...');
+    tp('dm','fetching...');
     try {
       const d=await(await fetch(`${API}/trade/history`)).json();
-      if (!d.history?.length) { tp('dm','  no trades yet'); return; }
-      d.history.slice(0,10).forEach(t=>tp(t.pnl>=0?'gr':'rd',`  ${t.symbol}  ${t.pnl>=0?'+':''}$${t.pnl}  ${(t.ts||'').slice(0,16)}`));
-    } catch(e) { tp('rd','  error: '+e.message); }
+      if (!d.history?.length) { tp('dm','no trades yet'); return; }
+      d.history.slice(0,10).forEach(t=>tp(t.pnl>=0?'gr':'rd',`${t.symbol}  ${t.pnl>=0?'+':''}$${t.pnl}`));
+    } catch(e) { tp('rd','error: '+e.message); }
     return;
   }
   if (c==='wallet'||c==='6') {
-    tp('dm','  checking...');
-    try { const d=await(await fetch(`${API}/wallet/${wallet}`)).json(); tp('yl',`  ${wallet.slice(0,6)}...${wallet.slice(-4)}  ${d.sol} SOL`); }
-    catch(e) { tp('rd','  error: '+e.message); }
+    tp('dm','checking...');
+    try { const d=await(await fetch(`${API}/wallet/${wallet}`)).json(); tp('yl',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${d.sol} SOL`); }
+    catch(e) { tp('rd','error: '+e.message); }
     return;
   }
-  tp('dm','  thinking...');
+  tp('dm','thinking...');
   try {
     const r=await fetch(`${API}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:raw,wallet})});
     const d=await r.json();
-    tp('mg',`  BR0THER › ${d.reply||'...'}`);
-  } catch(e) { tp('rd','  unavailable — try: help, status, market'); }
+    tp('mg',`BR0THER › ${d.reply||'...'}`);
+  } catch(e) { tp('rd','unavailable — try: help, status, market'); }
 }
 
 loadConfig();
+typeEnter();
 </script>
 </body>
 </html>
