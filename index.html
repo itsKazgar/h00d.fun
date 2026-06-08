@@ -13,9 +13,6 @@ html, body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 body::after {
   content: '';
@@ -23,123 +20,104 @@ body::after {
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.007) 2px, rgba(0,255,136,0.007) 4px);
   pointer-events: none; z-index: 100;
 }
-#enter-screen {
-  display: flex; align-items: center; justify-content: center;
+.screen {
   position: fixed; inset: 0;
-  transition: opacity 0.4s;
-  z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(16px, 4vw, 40px);
+  transition: opacity 0.5s;
 }
+.screen.hidden { opacity: 0; pointer-events: none; }
+
+/* ENTER */
 #enter-text {
   font-size: clamp(14px, 4vw, 18px);
   color: #00ff88;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   cursor: pointer;
   min-height: 28px;
+  text-align: center;
 }
-#boot-screen {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  position: fixed; inset: 0;
-  padding: 40px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.5s;
-  z-index: 4;
-}
-#lines-wrap {
-  width: 100%; max-width: 320px;
-  margin-bottom: 32px;
-}
-.bl {
-  font-size: 11px; line-height: 2;
-  color: #00ff8866;
-  display: flex; align-items: center; gap: 10px;
-  opacity: 0; transition: opacity 0.2s;
-}
-.bl.visible { opacity: 1; }
-.bl.dim { color: #1a3328; transition: color 0.4s; }
-.tag {
-  font-size: 9px; padding: 1px 6px; border-radius: 2px;
-  min-width: 44px; text-align: center; letter-spacing: 0.5px; flex-shrink: 0;
-}
-.tag.ok    { color: #00ff88; border: 1px solid #00ff8833; }
-.tag.spawn { color: #cc88ff88; border: 1px solid #cc88ff22; }
-.tag.info  { color: #00ffff44; border: 1px solid #00ffff22; }
-.bl-text { font-size: 11px; }
-.cur {
-  display: inline-block; width: 6px; height: 11px;
-  background: #00ff88; vertical-align: middle; margin-left: 1px;
-  animation: blink 0.5s step-end infinite;
-}
-@keyframes blink { 50% { opacity: 0; } }
-#bar-wrap { width: 100%; max-width: 320px; }
-#bar-label {
-  display: flex; justify-content: space-between;
-  font-size: 10px; color: #ffffff15; margin-bottom: 6px;
-}
-#bar-pct { color: #00ff8833; }
-#bar-outer { width: 100%; height: 2px; background: #1a1a1a; }
-#bar-inner { height: 100%; width: 0%; background: #00ff88; transition: width 0.25s linear; }
 
-#main-screen {
-  display: flex; align-items: center; justify-content: center;
-  position: fixed; inset: 0;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.7s;
-  padding: clamp(12px, 4vw, 32px);
-  z-index: 3;
+/* MAIN */
+#main-box {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 #abox {
   color: #00ffff;
   font-size: clamp(8px, 2.6vw, 14px);
-  line-height: 1.55; white-space: pre;
-  overflow-x: hidden; width: 100%;
+  line-height: 1.55;
+  white-space: pre;
+  width: 100%;
 }
 #pline {
-  color: #00ff88; font-size: clamp(10px, 2.6vw, 13px);
+  color: #00ff88;
+  font-size: clamp(10px, 2.6vw, 13px);
   margin-top: 12px;
   display: flex; align-items: center; gap: 4px;
+  width: 100%;
 }
 #pcur {
   display: inline-block; width: 8px; height: 13px;
   background: #00ff88;
-  animation: blink 1s step-end infinite; vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
 }
 #status {
   margin-top: 10px;
   font-size: clamp(10px, 2.6vw, 12px);
   color: #555; word-break: break-word;
   min-height: 16px;
+  width: 100%;
 }
 #menu-key {
   background: transparent; border: none; outline: none;
   color: #00ff88; font-family: 'Courier New', monospace;
   font-size: clamp(12px, 2.6vw, 14px);
   width: 40px; caret-color: #00ff88;
-  position: absolute; opacity: 0;
 }
+
+/* TERMINAL */
+#term-out {
+  width: 100%;
+  line-height: 1.7;
+  font-size: clamp(10px, 2.6vw, 13px);
+  overflow-x: hidden;
+}
+#term-out div { white-space: pre-wrap; word-break: break-word; }
+#tline {
+  color: #00ff88; font-size: clamp(10px, 2.6vw, 13px);
+  margin-top: 10px;
+  display: flex; align-items: center; gap: 4px;
+  width: 100%;
+}
+#tcmd {
+  background: transparent; border: none; outline: none;
+  color: #00ff88; font-family: 'Courier New', monospace;
+  font-size: clamp(12px, 2.6vw, 13px);
+  flex: 1; caret-color: #00ff88; min-width: 0;
+}
+
+.cur {
+  display: inline-block; width: 6px; height: 11px;
+  background: #00ff88; vertical-align: middle; margin-left: 1px;
+  animation: blink 0.5s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
 </style>
 </head>
 <body>
 
-<div id="enter-screen">
+<div class="screen" id="enter-screen">
   <div id="enter-text"></div>
 </div>
 
-<div id="boot-screen">
-  <div id="lines-wrap"></div>
-  <div id="bar-wrap">
-    <div id="bar-label">
-      <span id="bar-status">loading</span>
-      <span id="bar-pct">0%</span>
-    </div>
-    <div id="bar-outer"><div id="bar-inner"></div></div>
-  </div>
-</div>
-
-<div id="main-screen">
-  <div style="width:100%;max-width:460px">
-    <pre id="abox">
-╔══════════════════════════════════════════╗
+<div class="screen hidden" id="main-screen">
+  <div id="main-box">
+    <pre id="abox">╔══════════════════════════════════════════╗
 ║                                          ║
 ║  holders only. verify $H00D below.       ║
 ║                                          ║
@@ -158,23 +136,29 @@ body::after {
   </div>
 </div>
 
+<div class="screen hidden" id="term-screen">
+  <div id="main-box" style="max-width:460px;width:100%">
+    <div id="term-out"></div>
+    <div id="tline">
+      <span>  you ›</span>
+      <input id="tcmd" type="text" autocomplete="off" spellcheck="false">
+    </div>
+  </div>
+</div>
+
 <script>
 const API = window.location.origin;
 let wallet = null, hoodBal = 0, hoodMint = null, minBal = 100000;
 
-const BOOT_LINES = [
-  { tag:'ok',    text:'connecting...' },
-  { tag:'ok',    text:'$H00D ledger — mounted' },
-  { tag:'ok',    text:'wallet gate — armed' },
-  { tag:'spawn', text:'spawning Scanner       [pid 1338]' },
-  { tag:'spawn', text:'spawning WhaleTracker  [pid 1339]' },
-  { tag:'spawn', text:'spawning PumpHunter    [pid 1340]' },
-  { tag:'spawn', text:'spawning RiskManager   [pid 1341]' },
-  { tag:'info',  text:'9 agents running' },
-  { tag:'ok',    text:'collective is live.' },
-];
+function show(id) {
+  ['enter-screen','main-screen','term-screen'].forEach(s => {
+    const el = document.getElementById(s);
+    if (s === id) { el.classList.remove('hidden'); }
+    else { el.classList.add('hidden'); }
+  });
+}
 
-// ── ENTER SCREEN ──────────────────────────────────────────────────────────────
+// ── TYPE [ enter ] ────────────────────────────────────────────────────────────
 function typeEnter() {
   const el = document.getElementById('enter-text');
   const word = '[ enter ]';
@@ -182,7 +166,7 @@ function typeEnter() {
   el.innerHTML = '';
   function t() {
     if (ci <= word.length) {
-      el.innerHTML = word.slice(0, ci) + '<span style="display:inline-block;width:9px;height:16px;background:#00ff88;vertical-align:middle;margin-left:2px;animation:blink 0.7s step-end infinite"></span>';
+      el.innerHTML = word.slice(0, ci) + '<span class="cur"></span>';
       ci++;
       setTimeout(t, 80 + Math.random() * 40);
     } else {
@@ -192,96 +176,18 @@ function typeEnter() {
   t();
 }
 
-document.getElementById('enter-text').addEventListener('click', startBoot);
+document.getElementById('enter-text').addEventListener('click', goMain);
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    const es = document.getElementById('enter-screen');
-    if (es.style.opacity !== '0') startBoot();
-    else handleMenuKey(e);
-  }
+  const es = document.getElementById('enter-screen');
+  if (e.key === 'Enter' && !es.classList.contains('hidden')) goMain();
 });
 
-// ── BOOT SEQUENCE ─────────────────────────────────────────────────────────────
-function startBoot() {
-  const es = document.getElementById('enter-screen');
-  const bs = document.getElementById('boot-screen');
-  const wrap = document.getElementById('lines-wrap');
-  const bar = document.getElementById('bar-inner');
-  const pct = document.getElementById('bar-pct');
-  const bstat = document.getElementById('bar-status');
-
-  es.style.opacity = '0';
-  es.style.pointerEvents = 'none';
-  bs.style.opacity = '1';
-  bs.style.pointerEvents = 'auto';
-  bar.style.transition = 'none';
-  bar.style.width = '0%';
-  pct.textContent = '0%';
-  wrap.innerHTML = '';
-
-  const rows = BOOT_LINES.map(({ tag, text }) => {
-    const div = document.createElement('div');
-    div.className = 'bl';
-    const tagEl = document.createElement('span');
-    tagEl.className = 'tag ' + tag;
-    tagEl.textContent = tag.toUpperCase();
-    const textEl = document.createElement('span');
-    textEl.className = 'bl-text';
-    div.appendChild(tagEl); div.appendChild(textEl);
-    wrap.appendChild(div);
-    return { div, textEl, text, tag };
-  });
-
-  let li = 0;
-  function nextLine() {
-    if (li >= rows.length) {
-      bar.style.transition = 'width 0.3s linear';
-      bar.style.width = '100%';
-      pct.textContent = '100%';
-      bstat.textContent = 'done';
-      setTimeout(showMain, 500);
-      return;
-    }
-    const { div, textEl, text, tag } = rows[li];
-    div.classList.add('visible');
-    const p = Math.round((li + 1) / rows.length * 100);
-    bar.style.transition = 'width 0.25s linear';
-    bar.style.width = p + '%';
-    pct.textContent = p + '%';
-    bstat.textContent = text.replace(/\[.*\]/, '').trim();
-    let ci = 0;
-    function typeChar() {
-      if (ci <= text.length) {
-        textEl.innerHTML = text.slice(0, ci) + '<span class="cur"></span>';
-        ci++;
-        setTimeout(typeChar, 22 + Math.random() * 14);
-      } else {
-        textEl.textContent = text;
-        if (li > 0) rows[li - 1].div.classList.add('dim');
-        li++;
-        setTimeout(nextLine, tag === 'spawn' ? 90 : 300);
-      }
-    }
-    typeChar();
-  }
-  setTimeout(nextLine, 300);
-}
-
-function showMain() {
-  const bs = document.getElementById('boot-screen');
-  const ms = document.getElementById('main-screen');
-  bs.style.opacity = '0';
-  bs.style.pointerEvents = 'none';
-  ms.style.opacity = '1';
-  ms.style.pointerEvents = 'auto';
+function goMain() {
+  show('main-screen');
   document.getElementById('menu-key').focus();
 }
 
-// ── MENU INPUT ────────────────────────────────────────────────────────────────
-function handleMenuKey(e) {
-  if (e.key === '1') connectWallet();
-  else if (e.key === '2') openBuy();
-}
+// ── MENU ──────────────────────────────────────────────────────────────────────
 document.getElementById('menu-key').addEventListener('keydown', function(e) {
   if (e.key === '1') connectWallet();
   else if (e.key === '2') openBuy();
@@ -327,31 +233,18 @@ function openBuy() {
 }
 
 function enterTerminal() {
-  const ms = document.getElementById('main-screen');
-  ms.style.opacity = '0';
-  ms.style.pointerEvents = 'none';
-  setTimeout(() => {
-    ms.innerHTML = `<div style="width:100%;max-width:460px;padding:clamp(12px,4vw,32px)">
-      <div id="term-out" style="line-height:1.7;font-size:clamp(10px,2.6vw,13px);overflow-x:hidden"></div>
-      <div style="color:#00ff88;font-size:12px;margin-top:10px;display:flex;align-items:center;gap:4px">
-        <span>  you ›</span>
-        <input id="tcmd" type="text" autocomplete="off" spellcheck="false" style="background:transparent;border:none;outline:none;color:#00ff88;font-family:'Courier New',monospace;font-size:clamp(12px,2.6vw,13px);flex:1;caret-color:#00ff88;min-width:0">
-      </div>
-    </div>`;
-    ms.style.opacity = '1';
-    ms.style.pointerEvents = 'auto';
-    document.getElementById('tcmd').focus();
-    tp('gr','✓ access granted');
-    tp('dm',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D`);
-    tp('dm','type help for commands');
-    document.getElementById('tcmd').addEventListener('keydown', function(e) {
-      if (e.key !== 'Enter') return;
-      const cmd = this.value.trim(); this.value = '';
-      if (!cmd) return;
-      tp('cy','you › ' + cmd);
-      runCmd(cmd);
-    });
-  }, 600);
+  show('term-screen');
+  document.getElementById('tcmd').focus();
+  tp('gr','✓ access granted');
+  tp('dm',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D`);
+  tp('dm','type help for commands');
+  document.getElementById('tcmd').addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const cmd = this.value.trim(); this.value = '';
+    if (!cmd) return;
+    tp('cy','you › ' + cmd);
+    runCmd(cmd);
+  });
 }
 
 function tp(col, text) {
@@ -360,8 +253,6 @@ function tp(col, text) {
   if (!d) return;
   const s = document.createElement('div');
   s.style.color = colors[col] || '#00ff88';
-  s.style.whiteSpace = 'pre-wrap';
-  s.style.wordBreak = 'break-word';
   s.textContent = text;
   d.appendChild(s);
   window.scrollTo(0, document.body.scrollHeight);
