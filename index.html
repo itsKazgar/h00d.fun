@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BR0THER-H00D</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -24,51 +24,32 @@ html, body {
 .rd { color: #ff4444; }
 .dm { color: #555; }
 pre { white-space: pre; line-height: 1.5; }
-@media (max-width: 520px) {
-  html, body { font-size: 11px; align-items: flex-start; padding-top: 20px; }
-  #app { padding: 10px; }
-}
-@media (max-width: 380px) {
-  html, body { font-size: 9px; }
-}
+
 #status { min-height: 20px; margin-top: 10px; font-size: 14px; color: #555; }
-#menu-input-row { display: flex; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px; }
+
+#menu-input-row { display: flex; margin-top: 12px; }
 #menu-input-row span { color: #00ffff; white-space: pre; }
 #menu-key {
-  background: transparent;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  color: #00ffff;
-  font-family: 'Courier New', monospace;
-  font-size: 15px;
-  width: 40px;
-  caret-color: #00ffff;
+  background: transparent; border: none; outline: none;
+  color: #00ffff; font-family: 'Courier New', monospace;
+  font-size: 15px; width: 40px; caret-color: #00ffff;
 }
+
 #terminal { display: none; }
 #term-out { white-space: pre-wrap; line-height: 1.6; word-break: break-word; }
-#term-input { display: flex; align-items: center; margin-top: 6px; flex-wrap: wrap; gap: 8px; }
+#term-input { display: flex; margin-top: 6px; }
 #term-input span { color: #00ffff; white-space: pre; }
 #tcmd {
   background: transparent; border: none; outline: none;
   color: #00ffff; font-family: 'Courier New', monospace;
-  font-size: 15px; flex: 1; min-width: 100px; caret-color: #00ffff;
+  font-size: 15px; flex: 1; caret-color: #00ffff;
 }
-#send-btn {
-  display: none;
-  background: transparent;
-  border: 1px solid #00ffff;
-  color: #00ffff;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-@media (max-width: 700px) { #send-btn { display: inline-block; } }
 </style>
 </head>
 <body>
 <div id="app">
+
+<!-- ENTRY -->
 <div id="entry">
 <pre class="cy">
   ╔══════════════════════════════════════════════╗
@@ -84,36 +65,37 @@ pre { white-space: pre; line-height: 1.5; }
   ║                                              ║
   ╚══════════════════════════════════════════════╝
 </pre>
+
 <div id="menu-input-row">
-  <span>  Select (1-2): </span>
-  <input id="menu-key" type="text" inputmode="numeric" autofocus autocomplete="off" spellcheck="false">
+  <span>  Select (0-2): </span>
+  <input id="menu-key" type="text" autofocus autocomplete="off" spellcheck="false">
 </div>
 <div id="status"></div>
 </div>
+
+<!-- TERMINAL -->
 <div id="terminal">
 <div id="term-out"></div>
 <div id="term-input">
   <span>  you › </span>
   <input id="tcmd" type="text" autocomplete="off" spellcheck="false" onkeydown="termKey(event)">
-  <button id="send-btn" onclick="termSend()">SEND</button>
 </div>
 </div>
+
 </div>
 <script>
 const API = window.location.origin;
 let wallet = null, hoodBal = 0, hoodMint = null, minBal = 100000;
 
+// ── keyboard input on entry screen ───────────────────────────────────────────
 document.getElementById('menu-key').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') menuEnter();
+  if (e.key === 'Enter') {
+    const v = this.value.trim();
+    this.value = '';
+    if (v === '1') connectWallet();
+    else if (v === '2') openBuy();
+  }
 });
-
-function menuEnter() {
-  const input = document.getElementById('menu-key');
-  const v = input.value.trim();
-  input.value = '';
-  if (v === '1') connectWallet();
-  else if (v === '2') openBuy();
-}
 
 function setStatus(msg, color) {
   const el = document.getElementById('status');
@@ -125,7 +107,7 @@ async function loadConfig() {
   try {
     const d = await (await fetch(`${API}/gate/config`)).json();
     hoodMint = d.mint;
-    minBal = d.min_balance || 100000;
+    minBal   = d.min_balance || 100000;
   } catch(e) {}
 }
 
@@ -139,6 +121,7 @@ async function connectWallet() {
     const resp = await window.solana.connect();
     wallet = resp.publicKey.toString();
     setStatus(`checking $H00D balance for ${wallet.slice(0,6)}...${wallet.slice(-4)}`, '#ffff00');
+
     const r = await fetch(`${API}/gate/check`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
@@ -146,6 +129,7 @@ async function connectWallet() {
     });
     const gate = await r.json();
     hoodBal = gate.balance || 0;
+
     if (gate.access) {
       setStatus(`✓  ${hoodBal.toLocaleString()} $H00D confirmed — entering...`, '#00ff88');
       setTimeout(enterTerminal, 700);
@@ -158,14 +142,17 @@ async function connectWallet() {
 }
 
 function openBuy() {
-  window.open(hoodMint ? `https://pump.fun/coin/${hoodMint}` : 'https://pump.fun/coin/EsTANEh41uympzRrzpqXQZDTAV5996ykpdHWz1mzpump', '_blank');
+  window.open(hoodMint ? `https://pump.fun/coin/EsTANEh41uympzRrzpqXQZDTAV5996ykpdHWz1mzpump'https://pump.fun', '_blank');
 }
 
 function enterTerminal() {
   document.getElementById('entry').style.display = 'none';
   document.getElementById('terminal').style.display = 'block';
   document.getElementById('tcmd').focus();
-  tp('cy',`\n  ╔══════════════════════════════════════════════╗\n  ║  BR0THER-H00D                                ║\n  ╠══════════════════════════════════════════════╣`);
+  tp('cy',`
+  ╔══════════════════════════════════════════════╗
+  ║  BR0THER-H00D                                ║
+  ╠══════════════════════════════════════════════╣`);
   tp('gr',`  ║  ✓ access granted                            ║`);
   tp('cy',`  ╚══════════════════════════════════════════════╝`);
   tp('dm',`\n  ${wallet.slice(0,6)}...${wallet.slice(-4)}  ·  ${hoodBal.toLocaleString()} $H00D\n`);
@@ -183,8 +170,8 @@ function tp(col, text) {
   window.scrollTo(0, document.body.scrollHeight);
 }
 
-function termKey(e) { if (e.key !== 'Enter') return; termSend(); }
-function termSend() {
+function termKey(e) {
+  if (e.key !== 'Enter') return;
   const cmd = document.getElementById('tcmd').value.trim();
   document.getElementById('tcmd').value = '';
   if (!cmd) return;
@@ -194,6 +181,7 @@ function termSend() {
 
 async function runCmd(raw) {
   const c = raw.toLowerCase().trim();
+
   if (c==='help') {
     tp('dm',`\n  ──────────────────────────────────────────────`);
     tp('gr',`  [1]  status      — agents & portfolio`);
@@ -209,9 +197,11 @@ async function runCmd(raw) {
     tp('dm',`  ──────────────────────────────────────────────\n`);
     return;
   }
+
   if(c==='clear'||c==='c'){document.getElementById('term-out').innerHTML='';return;}
   if(c==='exit'||c==='0'){tp('dm','  disconnecting...');setTimeout(()=>window.close(),700);return;}
   if(c==='hood'||c==='7'){tp('yl',`  ${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D\n`);return;}
+
   if(c==='pro'||c==='8'){
     if(hoodBal>=1000000){
       tp('mg',`\n  ╔══════════════════════════════════════════════╗`);
@@ -225,38 +215,43 @@ async function runCmd(raw) {
     }
     return;
   }
+
   if(c==='status'||c==='1'){
     tp('dm','  fetching...');
     try{
       const d=await(await fetch(`${API}/status`)).json();
       tp('dm',`\n  ──────────────────────────────────────────────`);
       tp(d.running?'gr':'dm',`  agents     ${d.running?'● LIVE':'○ offline'}`);
-      tp('yl',`  balance    $${d.balance}`);
+      tp('yl', `  balance    $${d.balance}`);
       tp(d.total_pnl>=0?'gr':'rd',`  pnl        ${d.total_pnl>=0?'+':''}$${d.total_pnl}`);
-      tp('cy',`  trades     ${d.trades}`);
-      tp('cy',`  sentiment  ${d.fear_greed} — ${d.fg_label}`);
-      tp('dm',`  ──────────────────────────────────────────────\n`);
+      tp('cy', `  trades     ${d.trades}`);
+      tp('cy', `  sentiment  ${d.fear_greed} — ${d.fg_label}`);
+      tp('dm', `  ──────────────────────────────────────────────\n`);
     }catch(e){tp('rd',`  error: ${e.message}`);}
     return;
   }
+
   if(c==='market'||c==='2'){
     tp('dm','  fetching...');
     try{const d=await(await fetch(`${API}/market/sol`)).json();tp('cy','\n'+d.text+'\n');}
     catch(e){tp('rd',`  error: ${e.message}`);}
     return;
   }
+
   if(c==='trending'||c==='3'){
     tp('dm','  fetching...');
     try{const d=await(await fetch(`${API}/market/trending`)).json();tp('cy','\n'+d.text+'\n');}
     catch(e){tp('rd',`  error: ${e.message}`);}
     return;
   }
+
   if(c==='pump'||c==='4'){
     tp('dm','  fetching...');
     try{const d=await(await fetch(`${API}/market/pump`)).json();tp('cy','\n'+d.text+'\n');}
     catch(e){tp('rd',`  error: ${e.message}`);}
     return;
   }
+
   if(c==='trades'||c==='5'){
     tp('dm','  fetching...');
     try{
@@ -270,6 +265,7 @@ async function runCmd(raw) {
     }catch(e){tp('rd',`  error: ${e.message}`);}
     return;
   }
+
   if(c==='wallet'||c==='6'){
     tp('dm','  checking...');
     try{
@@ -278,6 +274,7 @@ async function runCmd(raw) {
     }catch(e){tp('rd',`  error: ${e.message}`);}
     return;
   }
+
   tp('dm','  thinking...');
   try{
     const r=await fetch(`${API}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:raw,wallet})});
