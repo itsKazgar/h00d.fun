@@ -35,9 +35,15 @@ pre { white-space: pre; line-height: 1.5; }
 #menu-input-row { display: flex; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px; }
 #menu-input-row span { color: #00ffff; white-space: pre; }
 #menu-key {
-  background: transparent; border: none; outline: none;
-  color: #00ffff; font-family: 'Courier New', monospace;
-  font-size: 15px; width: 40px; caret-color: #00ffff;
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  color: #00ffff;
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  width: 40px;
+  caret-color: #00ffff;
 }
 #enter-btn {
   display: none;
@@ -49,7 +55,6 @@ pre { white-space: pre; line-height: 1.5; }
   padding: 4px 12px;
   cursor: pointer;
 }
-@media (max-width: 700px) { #enter-btn { display: inline-block; } }
 #terminal { display: none; }
 #term-out { white-space: pre-wrap; line-height: 1.6; word-break: break-word; }
 #term-input { display: flex; align-items: center; margin-top: 6px; flex-wrap: wrap; gap: 8px; }
@@ -108,21 +113,31 @@ pre { white-space: pre; line-height: 1.5; }
 <script>
 const API = window.location.origin;
 let wallet = null, hoodBal = 0, hoodMint = null, minBal = 100000;
+
+document.getElementById('menu-key').addEventListener('input', function() {
+  const btn = document.getElementById('enter-btn');
+  btn.style.display = this.value.trim() ? 'inline-block' : 'none';
+});
+
 document.getElementById('menu-key').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') menuEnter();
 });
+
 function menuEnter() {
   const input = document.getElementById('menu-key');
   const v = input.value.trim();
   input.value = '';
+  document.getElementById('enter-btn').style.display = 'none';
   if (v === '1') connectWallet();
   else if (v === '2') openBuy();
 }
+
 function setStatus(msg, color) {
   const el = document.getElementById('status');
   el.style.color = color || '#555';
   el.textContent = '\n  ' + msg;
 }
+
 async function loadConfig() {
   try {
     const d = await (await fetch(`${API}/gate/config`)).json();
@@ -130,6 +145,7 @@ async function loadConfig() {
     minBal = d.min_balance || 100000;
   } catch(e) {}
 }
+
 async function connectWallet() {
   if (!window.solana?.isPhantom) {
     setStatus('Phantom not found — install at phantom.app', '#ff4444');
@@ -157,9 +173,11 @@ async function connectWallet() {
     setStatus('error: ' + e.message, '#ff4444');
   }
 }
+
 function openBuy() {
   window.open(hoodMint ? `https://pump.fun/coin/${hoodMint}` : 'https://pump.fun/coin/EsTANEh41uympzRrzpqXQZDTAV5996ykpdHWz1mzpump', '_blank');
 }
+
 function enterTerminal() {
   document.getElementById('entry').style.display = 'none';
   document.getElementById('terminal').style.display = 'block';
@@ -170,6 +188,7 @@ function enterTerminal() {
   tp('dm',`\n  ${wallet.slice(0,6)}...${wallet.slice(-4)}  ·  ${hoodBal.toLocaleString()} $H00D\n`);
   tp('dm',`  type help for commands\n`);
 }
+
 function tp(col, text) {
   const colors = {cy:'#00ffff',gr:'#00ff88',yl:'#ffff00',mg:'#ff00ff',rd:'#ff4444',dm:'#555'};
   const d = document.getElementById('term-out');
@@ -180,6 +199,7 @@ function tp(col, text) {
   d.appendChild(s);
   window.scrollTo(0, document.body.scrollHeight);
 }
+
 function termKey(e) { if (e.key !== 'Enter') return; termSend(); }
 function termSend() {
   const cmd = document.getElementById('tcmd').value.trim();
@@ -188,6 +208,7 @@ function termSend() {
   tp('cy', `\n  you › ${cmd}`);
   runCmd(cmd);
 }
+
 async function runCmd(raw) {
   const c = raw.toLowerCase().trim();
   if (c==='help') {
@@ -281,6 +302,7 @@ async function runCmd(raw) {
     tp('mg',`\n  BR0THER › ${d.reply||'...'}\n`);
   }catch(e){tp('rd','  unavailable — try: help, status, market');}
 }
+
 loadConfig();
 </script>
 </body>
