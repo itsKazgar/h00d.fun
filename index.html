@@ -45,16 +45,6 @@ pre { white-space: pre; line-height: 1.5; }
   width: 40px;
   caret-color: #00ffff;
 }
-#enter-btn {
-  display: none;
-  background: transparent;
-  border: 1px solid #00ffff;
-  color: #00ffff;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
 #terminal { display: none; }
 #term-out { white-space: pre-wrap; line-height: 1.6; word-break: break-word; }
 #term-input { display: flex; align-items: center; margin-top: 6px; flex-wrap: wrap; gap: 8px; }
@@ -97,7 +87,6 @@ pre { white-space: pre; line-height: 1.5; }
 <div id="menu-input-row">
   <span>  Select (1-2): </span>
   <input id="menu-key" type="text" inputmode="numeric" autofocus autocomplete="off" spellcheck="false">
-  <button id="enter-btn" onclick="menuEnter()">ENTER</button>
 </div>
 <div id="status"></div>
 </div>
@@ -114,11 +103,6 @@ pre { white-space: pre; line-height: 1.5; }
 const API = window.location.origin;
 let wallet = null, hoodBal = 0, hoodMint = null, minBal = 100000;
 
-document.getElementById('menu-key').addEventListener('input', function() {
-  const btn = document.getElementById('enter-btn');
-  btn.style.display = this.value.trim() ? 'inline-block' : 'none';
-});
-
 document.getElementById('menu-key').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') menuEnter();
 });
@@ -127,7 +111,6 @@ function menuEnter() {
   const input = document.getElementById('menu-key');
   const v = input.value.trim();
   input.value = '';
-  document.getElementById('enter-btn').style.display = 'none';
   if (v === '1') connectWallet();
   else if (v === '2') openBuy();
 }
