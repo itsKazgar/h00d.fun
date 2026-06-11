@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npx -y serve -s . -l $PORT",
+    "startCommand": "npm start",
     "restartPolicyType": "ON_FAILURE"
   }
 }
