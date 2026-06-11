@@ -15,24 +15,37 @@
     #enter-word:hover { color: #fff; }
     .cur-thin { display: inline-block; width: 2px; height: 18px; background: #33ff33; animation: bl 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
     @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
-    #p2 { flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; padding: 2rem; }
-    .auth-title { font-size: 22px; letter-spacing: 4px; color: #33ff33; }
-    .field-label { font-size: 13px; color: #333; letter-spacing: 3px; margin-bottom: 4px; }
+    #p2 { flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem; padding: 2rem; }
+    .field-label { font-size: 13px; color: #444; letter-spacing: 3px; margin-bottom: 4px; }
     .err { font-size: 14px; color: #ff4444; letter-spacing: 1px; min-height: 18px; }
     .auth-toggle { font-size: 14px; color: #333; letter-spacing: 2px; }
     .auth-toggle span { color: #33ff33; cursor: pointer; }
     .auth-toggle span:hover { color: #fff; }
+    .wallet-hint { font-size: 13px; color: #333; letter-spacing: 1px; margin-top: -6px; }
     #p3 { flex-direction: column; padding: 2.5rem 3rem; gap: 1.5rem; }
     .topbar { display: flex; align-items: center; justify-content: space-between; }
     .topbar-user { font-size: 16px; color: #33ff33; letter-spacing: 2px; }
     .logout-btn { background: none; border: none; font-family: 'VT323', monospace; font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; }
     .logout-btn:hover { color: #ff4444; }
     .feed-wrap { border-top: 1px solid #1a1a1a; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
-    .p-meta { font-size: 14px; color: #333; }
+    .p-meta { font-size: 14px; color: #333; display: flex; align-items: center; gap: 10px; }
     .p-meta .who { color: #33ff33; }
     .p-body { font-size: 20px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
     .loading { font-size: 16px; color: #333; letter-spacing: 2px; }
-    input[type=text], input[type=password], textarea {
+    .send-sol-btn { background: none; border: 1px solid #1e3a1e; font-family: 'VT323', monospace; font-size: 13px; color: #2a7a2a; cursor: pointer; letter-spacing: 1px; padding: 1px 8px; line-height: 1.6; }
+    .send-sol-btn:hover { border-color: #33ff33; color: #33ff33; }
+    #sol-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 100; }
+    #sol-modal.open { display: flex; }
+    .sol-box { background: #0d0d0d; border: 1px solid #1e3a1e; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 280px; }
+    .sol-box-title { font-size: 18px; color: #33ff33; letter-spacing: 3px; }
+    .sol-to { font-size: 14px; color: #444; letter-spacing: 1px; }
+    .sol-to span { color: #33ff33; }
+    .sol-addr { font-size: 11px; color: #2a2a2a; letter-spacing: 1px; word-break: break-all; }
+    .sol-err { font-size: 13px; color: #ff4444; min-height: 16px; }
+    .sol-success { font-size: 13px; color: #33ff33; min-height: 16px; }
+    .sol-close { font-size: 13px; color: #333; cursor: pointer; letter-spacing: 2px; }
+    .sol-close:hover { color: #ff4444; }
+    input[type=text], input[type=password], input[type=number], textarea {
       -webkit-appearance: none; appearance: none;
       background: #0d0d0d !important; border: none !important; outline: none !important;
       box-shadow: none !important; border-radius: 0; padding: 0; margin: 0;
@@ -40,6 +53,7 @@
       -webkit-text-fill-color: #ffffff !important; color: #ffffff !important;
     }
     input[type=text], input[type=password] { font-size: 18px !important; letter-spacing: 2px; width: 260px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; }
+    input[type=number] { font-size: 18px !important; letter-spacing: 2px; width: 160px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; }
     input::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
     textarea#msg { font-size: 20px !important; resize: none; width: 100%; line-height: 1.5; letter-spacing: 1px; }
     textarea#msg::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
@@ -54,7 +68,6 @@
 </div>
 
 <div class="page" id="p2">
-  <div class="auth-title" id="auth-title">// LOGIN</div>
   <div>
     <div class="field-label">USERNAME</div>
     <input type="text" id="auth-user" placeholder="your name" maxlength="24" autocomplete="off" />
@@ -62,6 +75,11 @@
   <div>
     <div class="field-label">PASSWORD</div>
     <input type="password" id="auth-pass" placeholder="••••••••" maxlength="64" />
+  </div>
+  <div id="wallet-field" style="display:none">
+    <div class="field-label">SOLANA WALLET <span style="color:#333;font-size:11px;letter-spacing:1px;">optional</span></div>
+    <input type="text" id="auth-wallet" placeholder="your public key" maxlength="44" autocomplete="off" spellcheck="false" />
+    <div class="wallet-hint">so others can send you SOL</div>
   </div>
   <div class="err" id="auth-err"></div>
   <button class="action" id="auth-btn" onclick="submitAuth()">[ enter ]</button>
@@ -78,11 +96,28 @@
   <div class="feed-wrap" id="feed"><div class="loading">loading...</div></div>
 </div>
 
+<div id="sol-modal">
+  <div class="sol-box">
+    <div class="sol-box-title">send sol</div>
+    <div class="sol-to">to: <span id="sol-to-name"></span></div>
+    <div class="sol-addr" id="sol-to-addr"></div>
+    <div>
+      <div class="field-label">AMOUNT (SOL)</div>
+      <input type="number" id="sol-amount" placeholder="0.01" min="0.001" step="0.001" />
+    </div>
+    <div class="sol-err" id="sol-err"></div>
+    <div class="sol-success" id="sol-success"></div>
+    <button class="action" onclick="sendSol()">[ send ]</button>
+    <span class="sol-close" onclick="closeModal()">← cancel</span>
+  </div>
+</div>
+
 <script>
   const SB_URL = 'https://vbkeiyrrujxmavvhtbve.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZia2VpeXJydWp4bWF2dmh0YnZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTgwNDgsImV4cCI6MjA5Njc3NDA0OH0.eZUC4X-p8qFRT-Ga_xAxAWaOH5WQexEXgtJGul242Fo';
 
   let currentUser = localStorage.getItem('h00d_user') || null;
+  let currentWallet = localStorage.getItem('h00d_wallet') || null;
   let isRegister = false;
 
   const word = 'ENTER';
@@ -112,18 +147,24 @@
 
   function toggleMode() {
     isRegister = !isRegister;
-    document.getElementById('auth-title').textContent = isRegister ? '// REGISTER' : '// LOGIN';
     document.getElementById('auth-btn').textContent = isRegister ? '[ create ]' : '[ enter ]';
     document.getElementById('auth-toggle').innerHTML = isRegister
       ? 'have an account? <span onclick="toggleMode()">login</span>'
       : 'no account? <span onclick="toggleMode()">register</span>';
+    document.getElementById('wallet-field').style.display = isRegister ? 'block' : 'none';
     document.getElementById('auth-err').textContent = '';
   }
 
   async function sbFetch(path, opts = {}) {
     const res = await fetch(SB_URL + path, {
       ...opts,
-      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...(opts.headers || {}) }
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+        ...(opts.headers || {})
+      }
     });
     const data = await res.json();
     return { ok: res.ok, data };
@@ -132,18 +173,30 @@
   async function submitAuth() {
     const username = document.getElementById('auth-user').value.trim().toLowerCase();
     const password = document.getElementById('auth-pass').value;
+    const wallet   = document.getElementById('auth-wallet').value.trim();
     const err = document.getElementById('auth-err');
     err.textContent = '';
     if (!username || !password) { err.textContent = 'fill in both fields'; return; }
+
     if (isRegister) {
+      if (wallet && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) {
+        err.textContent = 'wallet address looks wrong'; return;
+      }
       const check = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=username');
       if (check.data && check.data.length > 0) { err.textContent = 'username taken'; return; }
-      const res = await sbFetch('/rest/v1/users', { method: 'POST', body: JSON.stringify({ username, password }) });
+      const body = { username, password };
+      if (wallet) body.wallet = wallet;
+      const res = await sbFetch('/rest/v1/users', { method: 'POST', body: JSON.stringify(body) });
       if (!res.ok) { err.textContent = 'error creating account'; return; }
+      if (wallet) localStorage.setItem('h00d_wallet', wallet);
     } else {
-      const res = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&password=eq.' + encodeURIComponent(password) + '&select=username');
+      const res = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&password=eq.' + encodeURIComponent(password) + '&select=username,wallet');
       if (!res.data || res.data.length === 0) { err.textContent = 'wrong username or password'; return; }
+      const w = res.data[0].wallet;
+      if (w) localStorage.setItem('h00d_wallet', w); else localStorage.removeItem('h00d_wallet');
+      currentWallet = w || null;
     }
+
     currentUser = username;
     localStorage.setItem('h00d_user', username);
     showFeed();
@@ -175,8 +228,9 @@
   }
 
   function logout() {
-    currentUser = null;
+    currentUser = null; currentWallet = null;
     localStorage.removeItem('h00d_user');
+    localStorage.removeItem('h00d_wallet');
     show('p1');
   }
 
@@ -190,14 +244,99 @@
     return Math.floor(diff/86400) + 'd ago';
   }
 
-  function render(posts) {
-    if (!posts || posts.length === 0) { document.getElementById('feed').innerHTML = '<div class="loading">no posts yet. be first.</div>'; return; }
-    document.getElementById('feed').innerHTML = posts.map(p => `
-      <div>
-        <div class="p-meta"><span class="who">${esc(p.username)}</span> · ${timeAgo(p.created_at)}</div>
+  const walletCache = {};
+  async function getWallet(username) {
+    if (walletCache[username] !== undefined) return walletCache[username];
+    const res = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=wallet');
+    const w = (res.data && res.data[0] && res.data[0].wallet) || null;
+    walletCache[username] = w;
+    return w;
+  }
+
+  async function render(posts) {
+    if (!posts || posts.length === 0) {
+      document.getElementById('feed').innerHTML = '<div class="loading">no posts yet. be first.</div>'; return;
+    }
+    document.getElementById('feed').innerHTML = posts.map((p, i) => `
+      <div id="post-${i}">
+        <div class="p-meta">
+          <span class="who">${esc(p.username)}</span>
+          · ${timeAgo(p.created_at)}
+          ${p.username !== currentUser ? `<span id="sol-btn-${i}"></span>` : ''}
+        </div>
         <div class="p-body">${esc(p.body)}</div>
       </div>
     `).join('');
+
+    posts.forEach(async (p, i) => {
+      if (p.username === currentUser) return;
+      const w = await getWallet(p.username);
+      if (!w) return;
+      const el = document.getElementById('sol-btn-' + i);
+      if (el) el.innerHTML = `<button class="send-sol-btn" onclick="openModal('${esc(p.username)}','${w}')">⬡ send sol</button>`;
+    });
+  }
+
+  let _solTo = null;
+
+  function openModal(username, wallet) {
+    _solTo = { username, wallet };
+    document.getElementById('sol-to-name').textContent = '@' + username;
+    document.getElementById('sol-to-addr').textContent = wallet;
+    document.getElementById('sol-amount').value = '';
+    document.getElementById('sol-err').textContent = '';
+    document.getElementById('sol-success').textContent = '';
+    document.getElementById('sol-modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('sol-modal').classList.remove('open');
+    _solTo = null;
+  }
+
+  async function sendSol() {
+    const err = document.getElementById('sol-err');
+    const suc = document.getElementById('sol-success');
+    err.textContent = ''; suc.textContent = '';
+    const amount = parseFloat(document.getElementById('sol-amount').value);
+    if (!amount || amount <= 0) { err.textContent = 'enter an amount'; return; }
+    if (!_solTo) return;
+
+    const provider = window.solana || window.phantom?.solana;
+    if (!provider || !provider.isPhantom) {
+      err.textContent = 'phantom not found — install phantom.app'; return;
+    }
+
+    try {
+      await provider.connect();
+      const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, clusterApiUrl } =
+        await import('https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.browser.esm.js');
+
+      const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
+      const fromPubkey = provider.publicKey;
+      const toPubkey   = new PublicKey(_solTo.wallet);
+      const lamports   = Math.round(amount * LAMPORTS_PER_SOL);
+
+      const tx = new Transaction().add(
+        SystemProgram.transfer({ fromPubkey, toPubkey, lamports })
+      );
+      const { blockhash } = await connection.getLatestBlockhash();
+      tx.recentBlockhash = blockhash;
+      tx.feePayer = fromPubkey;
+
+      const signed = await provider.signTransaction(tx);
+      const sig    = await connection.sendRawTransaction(signed.serialize());
+      await connection.confirmTransaction(sig, 'confirmed');
+
+      suc.textContent = '✓ sent! tx: ' + sig.slice(0, 12) + '…';
+      await sbFetch('/rest/v1/posts', {
+        method: 'POST',
+        body: JSON.stringify({ username: currentUser, body: `⬡ sent ${amount} SOL to @${_solTo.username}` })
+      });
+      setTimeout(() => { closeModal(); loadPosts(); }, 1800);
+    } catch(e) {
+      err.textContent = e.message || 'transaction failed';
+    }
   }
 
   if (currentUser) showFeed();
