@@ -4,77 +4,203 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>h00d.fun</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0d0d0d; min-height: 100vh; font-family: 'VT323', monospace; }
-    #p1 { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    body { background: #0d0d0d; min-height: 100vh; font-family: 'VT323', monospace; color: #33ff33; }
+    .page { display: none; min-height: 100vh; }
+    .page.active { display: flex; }
+    #p1 { align-items: center; justify-content: center; }
     #enter-word { font-size: 28px; letter-spacing: 8px; color: #33ff33; cursor: pointer; }
     #enter-word:hover { color: #fff; }
     .cur-thin { display: inline-block; width: 2px; height: 18px; background: #33ff33; animation: bl 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
     @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
-    #p2 { display: none; min-height: 100vh; padding: 2.5rem 3rem; flex-direction: column; gap: 1.5rem; }
-    #msg { -webkit-appearance: none; appearance: none; background: #0d0d0d !important; border: none !important; outline: none !important; box-shadow: none !important; -webkit-text-fill-color: #ffffff !important; color: #ffffff !important; font-family: 'VT323', monospace !important; font-size: 22px !important; resize: none; width: 100%; line-height: 1.5; letter-spacing: 1px; caret-color: #33ff33; border-radius: 0; padding: 0; }
-    #msg::placeholder { color: #333 !important; -webkit-text-fill-color: #333 !important; }
-    #who { -webkit-appearance: none; appearance: none; background: #0d0d0d !important; border: none !important; outline: none !important; box-shadow: none !important; -webkit-text-fill-color: #ffffff !important; color: #ffffff !important; font-family: 'VT323', monospace !important; font-size: 16px !important; caret-color: #33ff33; border-radius: 0; padding: 0; flex: 1; letter-spacing: 1px; }
-    #who::placeholder { color: #333 !important; -webkit-text-fill-color: #333 !important; }
-    .name-row { display: flex; align-items: center; gap: 10px; }
-    .name-row span { font-size: 16px; color: #33ff33; }
-    .post-btn { background: #0d0d0d; border: none; font-family: 'VT323', monospace; font-size: 18px; color: #33ff33; cursor: pointer; letter-spacing: 2px; }
-    .post-btn:hover { color: #fff; }
+    #p2 { flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; padding: 2rem; }
+    .auth-title { font-size: 22px; letter-spacing: 4px; color: #33ff33; }
+    .field-label { font-size: 13px; color: #333; letter-spacing: 3px; margin-bottom: 4px; }
+    .err { font-size: 14px; color: #ff4444; letter-spacing: 1px; min-height: 18px; }
+    .auth-toggle { font-size: 14px; color: #333; letter-spacing: 2px; }
+    .auth-toggle span { color: #33ff33; cursor: pointer; }
+    .auth-toggle span:hover { color: #fff; }
+    #p3 { flex-direction: column; padding: 2.5rem 3rem; gap: 1.5rem; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-user { font-size: 16px; color: #33ff33; letter-spacing: 2px; }
+    .logout-btn { background: none; border: none; font-family: 'VT323', monospace; font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; }
+    .logout-btn:hover { color: #ff4444; }
     .feed-wrap { border-top: 1px solid #1a1a1a; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
     .p-meta { font-size: 14px; color: #333; }
     .p-meta .who { color: #33ff33; }
     .p-body { font-size: 20px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .loading { font-size: 16px; color: #333; letter-spacing: 2px; }
+    input[type=text], input[type=password], textarea {
+      -webkit-appearance: none; appearance: none;
+      background: #0d0d0d !important; border: none !important; outline: none !important;
+      box-shadow: none !important; border-radius: 0; padding: 0; margin: 0;
+      font-family: 'VT323', monospace !important; caret-color: #33ff33;
+      -webkit-text-fill-color: #ffffff !important; color: #ffffff !important;
+    }
+    input[type=text], input[type=password] { font-size: 18px !important; letter-spacing: 2px; width: 260px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; }
+    input::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
+    textarea#msg { font-size: 20px !important; resize: none; width: 100%; line-height: 1.5; letter-spacing: 1px; }
+    textarea#msg::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
+    button.action { background: none; border: none; font-family: 'VT323', monospace; font-size: 18px; color: #33ff33; cursor: pointer; letter-spacing: 3px; }
+    button.action:hover { color: #fff; }
   </style>
 </head>
 <body>
-  <div id="p1">
-    <span id="enter-word" onclick="goIn()"></span><span class="cur-thin"></span>
+
+<div class="page active" id="p1">
+  <span id="enter-word" onclick="showAuth()"></span><span class="cur-thin"></span>
+</div>
+
+<div class="page" id="p2">
+  <div class="auth-title" id="auth-title">// LOGIN</div>
+  <div>
+    <div class="field-label">USERNAME</div>
+    <input type="text" id="auth-user" placeholder="your name" maxlength="24" autocomplete="off" />
   </div>
-  <div id="p2">
-    <textarea id="msg" rows="3" placeholder="say something..."></textarea>
-    <div class="name-row">
-      <span>~</span>
-      <input id="who" type="text" placeholder="anon" maxlength="28" />
-      <button class="post-btn" onclick="doPost()">[ post ]</button>
-    </div>
-    <div class="feed-wrap" id="feed"></div>
+  <div>
+    <div class="field-label">PASSWORD</div>
+    <input type="password" id="auth-pass" placeholder="••••••••" maxlength="64" />
   </div>
-  <script>
-    const posts = [];
-    const word = 'ENTER';
-    let i = 0;
-    function typeIt() {
-      const el = document.getElementById('enter-word');
-      if (i <= word.length) { el.textContent = word.slice(0, i); i++; setTimeout(typeIt, 120); }
-    }
-    setTimeout(typeIt, 300);
-    document.addEventListener('keydown', e => {
-      const onP1 = document.getElementById('p1').style.display !== 'none';
-      if (onP1 && e.key === 'Enter') goIn();
-      if (!onP1 && e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); doPost(); }
+  <div class="err" id="auth-err"></div>
+  <button class="action" id="auth-btn" onclick="submitAuth()">[ enter ]</button>
+  <div class="auth-toggle" id="auth-toggle">no account? <span onclick="toggleMode()">register</span></div>
+</div>
+
+<div class="page" id="p3">
+  <div class="topbar">
+    <div class="topbar-user" id="topbar-user"></div>
+    <button class="logout-btn" onclick="logout()">[ logout ]</button>
+  </div>
+  <textarea id="msg" rows="3" placeholder="say something..."></textarea>
+  <button class="action" onclick="doPost()">[ post ]</button>
+  <div class="feed-wrap" id="feed"><div class="loading">loading...</div></div>
+</div>
+
+<script>
+  const SB_URL = 'https://vbkeiyrrujxmavvhtbve.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZia2VpeXJydWp4bWF2dmh0YnZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTgwNDgsImV4cCI6MjA5Njc3NDA0OH0.eZUC4X-p8qFRT-Ga_xAxAWaOH5WQexEXgtJGul242Fo';
+
+  let currentUser = localStorage.getItem('h00d_user') || null;
+  let isRegister = false;
+
+  const word = 'ENTER';
+  let ti = 0;
+  function typeIt() {
+    const el = document.getElementById('enter-word');
+    if (ti <= word.length) { el.textContent = word.slice(0, ti); ti++; setTimeout(typeIt, 120); }
+  }
+  setTimeout(typeIt, 300);
+
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('p1').classList.contains('active') && e.key === 'Enter') showAuth();
+    if (document.getElementById('p2').classList.contains('active') && e.key === 'Enter') submitAuth();
+    if (document.getElementById('p3').classList.contains('active') && e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); doPost(); }
+  });
+
+  function show(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function showAuth() {
+    if (currentUser) { showFeed(); return; }
+    show('p2');
+    setTimeout(() => document.getElementById('auth-user').focus(), 50);
+  }
+
+  function toggleMode() {
+    isRegister = !isRegister;
+    document.getElementById('auth-title').textContent = isRegister ? '// REGISTER' : '// LOGIN';
+    document.getElementById('auth-btn').textContent = isRegister ? '[ create ]' : '[ enter ]';
+    document.getElementById('auth-toggle').innerHTML = isRegister
+      ? 'have an account? <span onclick="toggleMode()">login</span>'
+      : 'no account? <span onclick="toggleMode()">register</span>';
+    document.getElementById('auth-err').textContent = '';
+  }
+
+  async function sbFetch(path, opts = {}) {
+    const res = await fetch(SB_URL + path, {
+      ...opts,
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...(opts.headers || {}) }
     });
-    function goIn() {
-      document.getElementById('p1').style.display = 'none';
-      const p2 = document.getElementById('p2');
-      p2.style.display = 'flex';
-      setTimeout(() => { const t = document.getElementById('msg'); t.style.cssText += '-webkit-text-fill-color: #ffffff !important; color: #ffffff !important;'; t.focus(); }, 50);
+    const data = await res.json();
+    return { ok: res.ok, data };
+  }
+
+  async function submitAuth() {
+    const username = document.getElementById('auth-user').value.trim().toLowerCase();
+    const password = document.getElementById('auth-pass').value;
+    const err = document.getElementById('auth-err');
+    err.textContent = '';
+    if (!username || !password) { err.textContent = 'fill in both fields'; return; }
+    if (isRegister) {
+      const check = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=username');
+      if (check.data && check.data.length > 0) { err.textContent = 'username taken'; return; }
+      const res = await sbFetch('/rest/v1/users', { method: 'POST', body: JSON.stringify({ username, password }) });
+      if (!res.ok) { err.textContent = 'error creating account'; return; }
+    } else {
+      const res = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&password=eq.' + encodeURIComponent(password) + '&select=username');
+      if (!res.data || res.data.length === 0) { err.textContent = 'wrong username or password'; return; }
     }
-    function doPost() {
-      const text = document.getElementById('msg').value.trim();
-      if (!text) return;
-      const who = document.getElementById('who').value.trim() || 'anon';
-      const now = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-      posts.unshift({ who, text, now });
-      document.getElementById('msg').value = '';
-      render();
-    }
-    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function render() {
-      document.getElementById('feed').innerHTML = posts.map(p => `<div><div class="p-meta"><span class="who">${esc(p.who)}</span> · ${esc(p.now)}</div><div class="p-body">${esc(p.text)}</div></div>`).join('');
-    }
-  </script>
+    currentUser = username;
+    localStorage.setItem('h00d_user', username);
+    showFeed();
+  }
+
+  function showFeed() {
+    document.getElementById('topbar-user').textContent = '~ ' + currentUser;
+    show('p3');
+    setTimeout(() => {
+      const t = document.getElementById('msg');
+      t.style.cssText += '-webkit-text-fill-color:#ffffff!important;color:#ffffff!important;';
+      t.focus();
+    }, 50);
+    loadPosts();
+  }
+
+  async function loadPosts() {
+    const res = await sbFetch('/rest/v1/posts?select=username,body,created_at&order=created_at.desc&limit=100');
+    if (!res.ok) { document.getElementById('feed').innerHTML = '<div class="loading">error loading posts</div>'; return; }
+    render(res.data);
+  }
+
+  async function doPost() {
+    const text = document.getElementById('msg').value.trim();
+    if (!text) return;
+    await sbFetch('/rest/v1/posts', { method: 'POST', body: JSON.stringify({ username: currentUser, body: text }) });
+    document.getElementById('msg').value = '';
+    loadPosts();
+  }
+
+  function logout() {
+    currentUser = null;
+    localStorage.removeItem('h00d_user');
+    show('p1');
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function timeAgo(ts) {
+    const diff = Math.floor((Date.now() - new Date(ts)) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    return Math.floor(diff/86400) + 'd ago';
+  }
+
+  function render(posts) {
+    if (!posts || posts.length === 0) { document.getElementById('feed').innerHTML = '<div class="loading">no posts yet. be first.</div>'; return; }
+    document.getElementById('feed').innerHTML = posts.map(p => `
+      <div>
+        <div class="p-meta"><span class="who">${esc(p.username)}</span> · ${timeAgo(p.created_at)}</div>
+        <div class="p-body">${esc(p.body)}</div>
+      </div>
+    `).join('');
+  }
+
+  if (currentUser) showFeed();
+</script>
 </body>
 </html>
