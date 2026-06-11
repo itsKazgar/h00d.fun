@@ -1,332 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>BR0THER-H00D</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  background: #0a0a0a;
-  color: #00ff88;
-  font-family: 'Courier New', monospace;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-}
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.007) 2px, rgba(0,255,136,0.007) 4px);
-  pointer-events: none; z-index: 100;
-}
-.screen {
-  position: fixed; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  padding: clamp(16px, 4vw, 40px);
-  text-align: center;
-  transition: opacity 0.5s;
-}
-.screen.hidden { opacity: 0; pointer-events: none; }
-
-/* ENTER */
-#enter-text {
-  font-size: clamp(14px, 4vw, 18px);
-  color: #00ff88;
-  letter-spacing: 3px;
-  cursor: pointer;
-  min-height: 28px;
-  text-align: center;
-}
-
-/* MAIN */
-#main-box {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-#abox {
-  font-size: clamp(8px, 2.6vw, 14px);
-  line-height: 1.55;
-  white-space: pre;
-}
-#abox {
-  color: #00ffff;
-  font-size: clamp(8px, 2.6vw, 14px);
-  line-height: 1.55;
-  white-space: pre;
-  width: 100%;
-}
-#pline {
-  color: #00ff88;
-  font-size: clamp(10px, 2.6vw, 13px);
-  margin-top: 12px;
-  display: flex; align-items: center; gap: 4px;
-  width: 100%;
-}
-#pcur {
-  display: inline-block; width: 8px; height: 13px;
-  background: #00ff88;
-  animation: blink 1s step-end infinite;
-  vertical-align: middle;
-}
-#status {
-  margin-top: 10px;
-  font-size: clamp(10px, 2.6vw, 12px);
-  color: #555; word-break: break-word;
-  min-height: 16px;
-  width: 100%;
-}
-#menu-key {
-  background: transparent; border: none; outline: none;
-  color: #00ff88; font-family: 'Courier New', monospace;
-  font-size: clamp(12px, 2.6vw, 14px);
-  width: 40px; caret-color: #00ff88;
-}
-
-/* TERMINAL */
-#term-out {
-  width: 100%;
-  line-height: 1.7;
-  font-size: clamp(10px, 2.6vw, 13px);
-  overflow-x: hidden;
-}
-#term-out div { white-space: pre-wrap; word-break: break-word; }
-#tline {
-  color: #00ff88; font-size: clamp(10px, 2.6vw, 13px);
-  margin-top: 10px;
-  display: flex; align-items: center; gap: 4px;
-  width: 100%;
-}
-#tcmd {
-  background: transparent; border: none; outline: none;
-  color: #00ff88; font-family: 'Courier New', monospace;
-  font-size: clamp(12px, 2.6vw, 13px);
-  flex: 1; caret-color: #00ff88; min-width: 0;
-}
-
-.cur {
-  display: inline-block; width: 6px; height: 11px;
-  background: #00ff88; vertical-align: middle; margin-left: 1px;
-  animation: blink 0.5s step-end infinite;
-}
-@keyframes blink { 50% { opacity: 0; } }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>h00d.fun</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0d0d0d; min-height: 100vh; font-family: 'VT323', monospace; }
+    #p1 { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    #enter-word { font-size: 28px; letter-spacing: 8px; color: #33ff33; cursor: pointer; }
+    #enter-word:hover { color: #fff; }
+    .cur-thin { display: inline-block; width: 2px; height: 18px; background: #33ff33; animation: bl 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
+    @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
+    #p2 { display: none; min-height: 100vh; padding: 2.5rem 3rem; flex-direction: column; gap: 1.5rem; }
+    #msg { -webkit-appearance: none; appearance: none; background: #0d0d0d !important; border: none !important; outline: none !important; box-shadow: none !important; -webkit-text-fill-color: #ffffff !important; color: #ffffff !important; font-family: 'VT323', monospace !important; font-size: 22px !important; resize: none; width: 100%; line-height: 1.5; letter-spacing: 1px; caret-color: #33ff33; border-radius: 0; padding: 0; }
+    #msg::placeholder { color: #333 !important; -webkit-text-fill-color: #333 !important; }
+    #who { -webkit-appearance: none; appearance: none; background: #0d0d0d !important; border: none !important; outline: none !important; box-shadow: none !important; -webkit-text-fill-color: #ffffff !important; color: #ffffff !important; font-family: 'VT323', monospace !important; font-size: 16px !important; caret-color: #33ff33; border-radius: 0; padding: 0; flex: 1; letter-spacing: 1px; }
+    #who::placeholder { color: #333 !important; -webkit-text-fill-color: #333 !important; }
+    .name-row { display: flex; align-items: center; gap: 10px; }
+    .name-row span { font-size: 16px; color: #33ff33; }
+    .post-btn { background: #0d0d0d; border: none; font-family: 'VT323', monospace; font-size: 18px; color: #33ff33; cursor: pointer; letter-spacing: 2px; }
+    .post-btn:hover { color: #fff; }
+    .feed-wrap { border-top: 1px solid #1a1a1a; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .p-meta { font-size: 14px; color: #333; }
+    .p-meta .who { color: #33ff33; }
+    .p-body { font-size: 20px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  </style>
 </head>
 <body>
-
-<div class="screen" id="enter-screen">
-  <div id="enter-text"></div>
-</div>
-
-<div class="screen hidden" id="main-screen">
-  <div id="main-box">
-    <pre id="abox">╔══════════════════════════════════════════╗
-║                                          ║
-║  holders only. verify $H00D below.       ║
-║                                          ║
-╠══════════════════════════════════════════╣
-║                                          ║
-║  [1]  Connect Phantom — verify $H00D     ║
-║  [2]  Buy $H00D on pump.fun              ║
-║                                          ║
-╚══════════════════════════════════════════╝</pre>
-    <div id="pline">
-      <span>  Select (0-2):</span>
-      <span id="pcur"></span>
-      <input id="menu-key" type="text" autocomplete="off" spellcheck="false">
-    </div>
-    <div id="status"></div>
+  <div id="p1">
+    <span id="enter-word" onclick="goIn()"></span><span class="cur-thin"></span>
   </div>
-</div>
-
-<div class="screen hidden" id="term-screen">
-  <div id="main-box" style="max-width:460px;width:100%">
-    <div id="term-out"></div>
-    <div id="tline">
-      <span>  you ›</span>
-      <input id="tcmd" type="text" autocomplete="off" spellcheck="false">
+  <div id="p2">
+    <textarea id="msg" rows="3" placeholder="say something..."></textarea>
+    <div class="name-row">
+      <span>~</span>
+      <input id="who" type="text" placeholder="anon" maxlength="28" />
+      <button class="post-btn" onclick="doPost()">[ post ]</button>
     </div>
+    <div class="feed-wrap" id="feed"></div>
   </div>
-</div>
-
-<script>
-const API = window.location.origin;
-let wallet = null, hoodBal = 0, hoodMint = null, minBal = 100000;
-
-function show(id) {
-  ['enter-screen','main-screen','term-screen'].forEach(s => {
-    const el = document.getElementById(s);
-    if (s === id) { el.classList.remove('hidden'); }
-    else { el.classList.add('hidden'); }
-  });
-}
-
-// ── TYPE [ enter ] ────────────────────────────────────────────────────────────
-function typeEnter() {
-  const el = document.getElementById('enter-text');
-  const word = '[ enter ]';
-  let ci = 0;
-  el.innerHTML = '';
-  function t() {
-    if (ci <= word.length) {
-      el.innerHTML = word.slice(0, ci) + '<span class="cur"></span>';
-      ci++;
-      setTimeout(t, 80 + Math.random() * 40);
-    } else {
-      el.textContent = word;
+  <script>
+    const posts = [];
+    const word = 'ENTER';
+    let i = 0;
+    function typeIt() {
+      const el = document.getElementById('enter-word');
+      if (i <= word.length) { el.textContent = word.slice(0, i); i++; setTimeout(typeIt, 120); }
     }
-  }
-  t();
-}
-
-document.getElementById('enter-text').addEventListener('click', goMain);
-document.addEventListener('keydown', e => {
-  const es = document.getElementById('enter-screen');
-  if (e.key === 'Enter' && !es.classList.contains('hidden')) goMain();
-});
-
-function goMain() {
-  show('main-screen');
-  document.getElementById('menu-key').focus();
-}
-
-// ── MENU ──────────────────────────────────────────────────────────────────────
-document.getElementById('menu-key').addEventListener('keydown', function(e) {
-  if (e.key === '1') connectWallet();
-  else if (e.key === '2') openBuy();
-});
-document.getElementById('main-screen').addEventListener('click', function() {
-  document.getElementById('menu-key').focus();
-});
-
-function setStatus(msg, color) {
-  const el = document.getElementById('status');
-  el.style.color = color || '#555';
-  el.textContent = msg;
-}
-
-async function loadConfig() {
-  try {
-    const d = await (await fetch(`${API}/gate/config`)).json();
-    hoodMint = d.mint; minBal = d.min_balance || 100000;
-  } catch(e) {}
-}
-
-async function connectWallet() {
-  if (!window.solana?.isPhantom) { setStatus('Phantom not found — install at phantom.app', '#ff4444'); return; }
-  try {
-    setStatus('connecting...', '#ffff0088');
-    const resp = await window.solana.connect();
-    wallet = resp.publicKey.toString();
-    setStatus(`checking $H00D for ${wallet.slice(0,6)}...${wallet.slice(-4)}`, '#ffff0088');
-    const r = await fetch(`${API}/gate/check`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({wallet}) });
-    const gate = await r.json();
-    hoodBal = gate.balance || 0;
-    if (gate.access) {
-      setStatus(`✓ ${hoodBal.toLocaleString()} $H00D confirmed — entering...`, '#00ff88');
-      setTimeout(enterTerminal, 700);
-    } else {
-      setStatus(`✗ need ${minBal.toLocaleString()} $H00D — you have ${hoodBal.toLocaleString()} — press 2 to buy`, '#ff4444');
+    setTimeout(typeIt, 300);
+    document.addEventListener('keydown', e => {
+      const onP1 = document.getElementById('p1').style.display !== 'none';
+      if (onP1 && e.key === 'Enter') goIn();
+      if (!onP1 && e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); doPost(); }
+    });
+    function goIn() {
+      document.getElementById('p1').style.display = 'none';
+      const p2 = document.getElementById('p2');
+      p2.style.display = 'flex';
+      setTimeout(() => { const t = document.getElementById('msg'); t.style.cssText += '-webkit-text-fill-color: #ffffff !important; color: #ffffff !important;'; t.focus(); }, 50);
     }
-  } catch(e) { setStatus('error: ' + e.message, '#ff4444'); }
-}
-
-function openBuy() {
-  window.open('https://pump.fun/coin/EsTANEh41uympzRrzpqXQZDTAV5996ykpdHWz1mzpump', '_blank');
-}
-
-function enterTerminal() {
-  show('term-screen');
-  document.getElementById('tcmd').focus();
-  tp('gr','✓ access granted');
-  tp('dm',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D`);
-  tp('dm','type help for commands');
-  document.getElementById('tcmd').addEventListener('keydown', function(e) {
-    if (e.key !== 'Enter') return;
-    const cmd = this.value.trim(); this.value = '';
-    if (!cmd) return;
-    tp('cy','you › ' + cmd);
-    runCmd(cmd);
-  });
-}
-
-function tp(col, text) {
-  const colors = {cy:'#00ffff',gr:'#00ff88',yl:'#ffff00',mg:'#ff00ff',rd:'#ff4444',dm:'#555'};
-  const d = document.getElementById('term-out');
-  if (!d) return;
-  const s = document.createElement('div');
-  s.style.color = colors[col] || '#00ff88';
-  s.textContent = text;
-  d.appendChild(s);
-  window.scrollTo(0, document.body.scrollHeight);
-}
-
-async function runCmd(raw) {
-  const c = raw.toLowerCase().trim();
-  if (c==='help') {
-    tp('dm','──────────────────────');
-    tp('gr','[1] status   — portfolio');
-    tp('cy','[2] market   — prices');
-    tp('cy','[3] trending — coingecko');
-    tp('cy','[4] pump     — pump.fun');
-    tp('mg','[5] trades   — history');
-    tp('cy','[6] wallet   — SOL balance');
-    tp('yl','[7] hood     — $H00D balance');
-    tp('mg','[8] pro      — PRO mode');
-    tp('dm','[c] clear  [0] exit');
-    tp('dm','──────────────────────');
-    return;
-  }
-  if (c==='clear'||c==='c') { document.getElementById('term-out').innerHTML=''; return; }
-  if (c==='exit'||c==='0') { tp('dm','disconnecting...'); setTimeout(()=>window.close(),700); return; }
-  if (c==='hood'||c==='7') { tp('yl',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${hoodBal.toLocaleString()} $H00D`); return; }
-  if (c==='pro'||c==='8') {
-    if (hoodBal>=1000000) { tp('mg','⚡ PRO MODE UNLOCKED'); }
-    else { tp('rd',`✗ need 1,000,000 $H00D — have ${hoodBal.toLocaleString()}`); tp('yl','press 2 to buy on pump.fun'); }
-    return;
-  }
-  if (c==='status'||c==='1') {
-    tp('dm','fetching...');
-    try {
-      const d=await(await fetch(`${API}/status`)).json();
-      tp('dm','──────────────────────');
-      tp(d.running?'gr':'dm',`agents   ${d.running?'● LIVE':'○ offline'}`);
-      tp('yl',`balance  $${d.balance}`);
-      tp(d.total_pnl>=0?'gr':'rd',`pnl      ${d.total_pnl>=0?'+':''}$${d.total_pnl}`);
-      tp('cy',`trades   ${d.trades}`);
-      tp('dm','──────────────────────');
-    } catch(e) { tp('rd','error: '+e.message); }
-    return;
-  }
-  if (c==='market'||c==='2') { tp('dm','fetching...'); try{const d=await(await fetch(`${API}/market/sol`)).json();tp('cy',d.text);}catch(e){tp('rd','error: '+e.message);} return; }
-  if (c==='trending'||c==='3') { tp('dm','fetching...'); try{const d=await(await fetch(`${API}/market/trending`)).json();tp('cy',d.text);}catch(e){tp('rd','error: '+e.message);} return; }
-  if (c==='pump'||c==='4') { tp('dm','fetching...'); try{const d=await(await fetch(`${API}/market/pump`)).json();tp('cy',d.text);}catch(e){tp('rd','error: '+e.message);} return; }
-  if (c==='trades'||c==='5') {
-    tp('dm','fetching...');
-    try {
-      const d=await(await fetch(`${API}/trade/history`)).json();
-      if (!d.history?.length) { tp('dm','no trades yet'); return; }
-      d.history.slice(0,10).forEach(t=>tp(t.pnl>=0?'gr':'rd',`${t.symbol}  ${t.pnl>=0?'+':''}$${t.pnl}`));
-    } catch(e) { tp('rd','error: '+e.message); }
-    return;
-  }
-  if (c==='wallet'||c==='6') {
-    tp('dm','checking...');
-    try { const d=await(await fetch(`${API}/wallet/${wallet}`)).json(); tp('yl',`${wallet.slice(0,6)}...${wallet.slice(-4)}  ${d.sol} SOL`); }
-    catch(e) { tp('rd','error: '+e.message); }
-    return;
-  }
-  tp('dm','thinking...');
-  try {
-    const r=await fetch(`${API}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:raw,wallet})});
-    const d=await r.json();
-    tp('mg',`BR0THER › ${d.reply||'...'}`);
-  } catch(e) { tp('rd','unavailable — try: help, status, market'); }
-}
-
-loadConfig();
-typeEnter();
-</script>
+    function doPost() {
+      const text = document.getElementById('msg').value.trim();
+      if (!text) return;
+      const who = document.getElementById('who').value.trim() || 'anon';
+      const now = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+      posts.unshift({ who, text, now });
+      document.getElementById('msg').value = '';
+      render();
+    }
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function render() {
+      document.getElementById('feed').innerHTML = posts.map(p => `<div><div class="p-meta"><span class="who">${esc(p.who)}</span> · ${esc(p.now)}</div><div class="p-body">${esc(p.text)}</div></div>`).join('');
+    }
+  </script>
 </body>
 </html>
