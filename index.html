@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>h00d.fun</title>
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #0d0d0d; min-height: 100vh; font-family: 'VT323', monospace; color: #33ff33; }
@@ -115,15 +116,7 @@
 <script>
   const BAG_SVG = `<svg width="18" height="20" viewBox="0 0 120 170" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
     <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"
-      d="M60 30
-         C52 30 44 26 44 20
-         C44 14 50 10 58 12
-         C54 6 56 0 62 0
-         C68 0 72 4 72 10
-         C72 8 76 6 80 8
-         C86 10 86 18 80 22
-         C78 24 74 26 70 28
-         C68 30 64 30 60 30 Z"/>
+      d="M60 30 C52 30 44 26 44 20 C44 14 50 10 58 12 C54 6 56 0 62 0 C68 0 72 4 72 10 C72 8 76 6 80 8 C86 10 86 18 80 22 C78 24 74 26 70 28 C68 30 64 30 60 30 Z"/>
     <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"
       d="M48 30 C44 36 42 42 42 48 M72 30 C76 36 78 42 78 48"/>
     <path stroke="#33ff33" stroke-width="6" stroke-linecap="round" fill="none"
@@ -136,8 +129,10 @@
   const SB_URL = 'https://vbkeiyrrujxmavvhtbve.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZia2VpeXJydWp4bWF2dmh0YnZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTgwNDgsImV4cCI6MjA5Njc3NDA0OH0.eZUC4X-p8qFRT-Ga_xAxAWaOH5WQexEXgtJGul242Fo';
 
-  let currentUser = localStorage.getItem('h00d_user') || null;
-  let currentWallet = localStorage.getItem('h00d_wallet') || null;
+  const sb = supabase.createClient(SB_URL, SB_KEY);
+
+  let currentUser = null;
+  let currentUsername = null;
   let isRegister = false;
 
   const word = 'ENTER';
@@ -147,6 +142,17 @@
     if (ti <= word.length) { el.textContent = word.slice(0, ti); ti++; setTimeout(typeIt, 120); }
   }
   setTimeout(typeIt, 300);
+
+  // check existing session on load
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      const { data: profile } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
+      if (profile) { currentUsername = profile.username; showFeed(); }
+    }
+  }
+  init();
 
   document.addEventListener('keydown', e => {
     if (document.getElementById('p1').classList.contains('active') && e.key === 'Enter') showAuth();
@@ -175,19 +181,6 @@
     document.getElementById('auth-err').textContent = '';
   }
 
-  async function sbFetch(path, opts = {}) {
-    const res = await fetch(SB_URL + path, {
-      ...opts,
-      headers: {
-        'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
-        'Content-Type': 'application/json', 'Prefer': 'return=representation',
-        ...(opts.headers || {})
-      }
-    });
-    const data = await res.json();
-    return { ok: res.ok, data };
-  }
-
   async function submitAuth() {
     const username = document.getElementById('auth-user').value.trim().toLowerCase();
     const password = document.getElementById('auth-pass').value;
@@ -195,29 +188,50 @@
     const err = document.getElementById('auth-err');
     err.textContent = '';
     if (!username || !password) { err.textContent = 'fill in both fields'; return; }
+
     if (isRegister) {
+      if (password.length < 6) { err.textContent = 'password min 6 characters'; return; }
       if (wallet && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) { err.textContent = 'wallet address looks wrong'; return; }
-      const check = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=username');
-      if (check.data && check.data.length > 0) { err.textContent = 'username taken'; return; }
-      const body = { username, password };
-      if (wallet) body.wallet = wallet;
-      const res = await sbFetch('/rest/v1/users', { method: 'POST', body: JSON.stringify(body) });
-      if (!res.ok) { err.textContent = 'error creating account'; return; }
-      if (wallet) localStorage.setItem('h00d_wallet', wallet);
+
+      // check username taken
+      const { data: existing } = await sb.from('profiles').select('username').eq('username', username).single();
+      if (existing) { err.textContent = 'username taken'; return; }
+
+      // sign up with supabase auth using username@h00d.fun as fake email
+      const { data, error } = await sb.auth.signUp({
+        email: username + '@h00d.fun',
+        password,
+      });
+      if (error) { err.textContent = error.message; return; }
+
+      // create profile
+      const profileData = { id: data.user.id, username };
+      if (wallet) profileData.wallet = wallet;
+      await sb.from('profiles').insert(profileData);
+
+      currentUser = data.user;
+      currentUsername = username;
+      showFeed();
+
     } else {
-      const res = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&password=eq.' + encodeURIComponent(password) + '&select=username,wallet');
-      if (!res.data || res.data.length === 0) { err.textContent = 'wrong username or password'; return; }
-      const w = res.data[0].wallet;
-      if (w) localStorage.setItem('h00d_wallet', w); else localStorage.removeItem('h00d_wallet');
-      currentWallet = w || null;
+      // look up username to get fake email
+      const { data: profile } = await sb.from('profiles').select('username').eq('username', username).single();
+      if (!profile) { err.textContent = 'wrong username or password'; return; }
+
+      const { data, error } = await sb.auth.signInWithPassword({
+        email: username + '@h00d.fun',
+        password,
+      });
+      if (error) { err.textContent = 'wrong username or password'; return; }
+
+      currentUser = data.user;
+      currentUsername = username;
+      showFeed();
     }
-    currentUser = username;
-    localStorage.setItem('h00d_user', username);
-    showFeed();
   }
 
   function showFeed() {
-    document.getElementById('topbar-user').textContent = '~ ' + currentUser;
+    document.getElementById('topbar-user').textContent = '~ ' + currentUsername;
     show('p3');
     setTimeout(() => {
       const t = document.getElementById('msg');
@@ -228,22 +242,22 @@
   }
 
   async function loadPosts() {
-    const res = await sbFetch('/rest/v1/posts?select=username,body,created_at&order=created_at.desc&limit=100');
-    if (!res.ok) { document.getElementById('feed').innerHTML = '<div class="loading">error loading posts</div>'; return; }
-    render(res.data);
+    const { data, error } = await sb.from('posts').select('username, body, created_at').order('created_at', { ascending: false }).limit(100);
+    if (error) { document.getElementById('feed').innerHTML = '<div class="loading">error loading posts</div>'; return; }
+    render(data);
   }
 
   async function doPost() {
     const text = document.getElementById('msg').value.trim();
     if (!text) return;
-    await sbFetch('/rest/v1/posts', { method: 'POST', body: JSON.stringify({ username: currentUser, body: text }) });
+    await sb.from('posts').insert({ username: currentUsername, body: text, user_id: currentUser.id });
     document.getElementById('msg').value = '';
     loadPosts();
   }
 
-  function logout() {
-    currentUser = null; currentWallet = null;
-    localStorage.removeItem('h00d_user'); localStorage.removeItem('h00d_wallet');
+  async function logout() {
+    await sb.auth.signOut();
+    currentUser = null; currentUsername = null;
     show('p1');
   }
 
@@ -260,8 +274,8 @@
   const walletCache = {};
   async function getWallet(username) {
     if (walletCache[username] !== undefined) return walletCache[username];
-    const res = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=wallet');
-    const w = (res.data && res.data[0] && res.data[0].wallet) || null;
+    const { data } = await sb.from('profiles').select('wallet').eq('username', username).single();
+    const w = (data && data.wallet) || null;
     walletCache[username] = w;
     return w;
   }
@@ -276,14 +290,14 @@
           <span class="who">${esc(p.username)}</span>
           <span style="color:#2a2a2a">·</span>
           <span>${timeAgo(p.created_at)}</span>
-          ${p.username !== currentUser ? `<span id="sol-btn-${i}"></span>` : ''}
+          ${p.username !== currentUsername ? `<span id="sol-btn-${i}"></span>` : ''}
         </div>
         <div class="p-body">${esc(p.body)}</div>
       </div>
     `).join('');
 
     posts.forEach(async (p, i) => {
-      if (p.username === currentUser) return;
+      if (p.username === currentUsername) return;
       const w = await getWallet(p.username);
       if (!w) return;
       const el = document.getElementById('sol-btn-' + i);
@@ -333,17 +347,12 @@
       const sig    = await connection.sendRawTransaction(signed.serialize());
       await connection.confirmTransaction(sig, 'confirmed');
       suc.textContent = '✓ sent! tx: ' + sig.slice(0, 12) + '…';
-      await sbFetch('/rest/v1/posts', {
-        method: 'POST',
-        body: JSON.stringify({ username: currentUser, body: `⬡ sent ${amount} SOL to @${_solTo.username}` })
-      });
+      await sb.from('posts').insert({ username: currentUsername, body: `⬡ sent ${amount} SOL to @${_solTo.username}`, user_id: currentUser.id });
       setTimeout(() => { closeModal(); loadPosts(); }, 1800);
     } catch(e) {
       err.textContent = e.message || 'transaction failed';
     }
   }
-
-  if (currentUser) showFeed();
 </script>
 </body>
 </html>
