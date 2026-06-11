@@ -28,19 +28,19 @@
     .logout-btn { background: none; border: none; font-family: 'VT323', monospace; font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; }
     .logout-btn:hover { color: #ff4444; }
     .feed-wrap { border-top: 1px solid #1a1a1a; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
-    .p-meta { font-size: 14px; color: #333; display: flex; align-items: center; gap: 10px; }
+    .p-meta { font-size: 14px; color: #333; display: flex; align-items: center; gap: 8px; }
     .p-meta .who { color: #33ff33; }
     .p-body { font-size: 20px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
     .loading { font-size: 16px; color: #333; letter-spacing: 2px; }
-    .send-sol-btn { background: none; border: 1px solid #1e3a1e; font-family: 'VT323', monospace; font-size: 13px; color: #2a7a2a; cursor: pointer; letter-spacing: 1px; padding: 1px 8px; line-height: 1.6; }
-    .send-sol-btn:hover { border-color: #33ff33; color: #33ff33; }
-    #sol-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 100; }
+    .bag-btn { background: none; border: none; cursor: pointer; padding: 0; opacity: 0.4; transition: opacity 0.15s, transform 0.15s; display: inline-flex; align-items: center; vertical-align: middle; }
+    .bag-btn:hover { opacity: 1; transform: scale(1.15); }
+    #sol-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; z-index: 100; }
     #sol-modal.open { display: flex; }
     .sol-box { background: #0d0d0d; border: 1px solid #1e3a1e; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 280px; }
     .sol-box-title { font-size: 18px; color: #33ff33; letter-spacing: 3px; }
     .sol-to { font-size: 14px; color: #444; letter-spacing: 1px; }
     .sol-to span { color: #33ff33; }
-    .sol-addr { font-size: 11px; color: #2a2a2a; letter-spacing: 1px; word-break: break-all; }
+    .sol-addr { font-size: 11px; color: #222; letter-spacing: 1px; word-break: break-all; margin-top: -6px; }
     .sol-err { font-size: 13px; color: #ff4444; min-height: 16px; }
     .sol-success { font-size: 13px; color: #33ff33; min-height: 16px; }
     .sol-close { font-size: 13px; color: #333; cursor: pointer; letter-spacing: 2px; }
@@ -113,6 +113,26 @@
 </div>
 
 <script>
+  const BAG_SVG = `<svg width="18" height="20" viewBox="0 0 120 170" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
+    <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"
+      d="M60 30
+         C52 30 44 26 44 20
+         C44 14 50 10 58 12
+         C54 6 56 0 62 0
+         C68 0 72 4 72 10
+         C72 8 76 6 80 8
+         C86 10 86 18 80 22
+         C78 24 74 26 70 28
+         C68 30 64 30 60 30 Z"/>
+    <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"
+      d="M48 30 C44 36 42 42 42 48 M72 30 C76 36 78 42 78 48"/>
+    <path stroke="#33ff33" stroke-width="6" stroke-linecap="round" fill="none"
+      d="M42 48 Q60 56 78 48"/>
+    <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"
+      d="M42 48 C14 56 10 90 10 100 C10 140 34 160 60 160 C86 160 110 140 110 100 C110 90 106 56 78 48"/>
+    <text x="60" y="124" font-family="'VT323',monospace" font-size="68" fill="#33ff33" text-anchor="middle" stroke="none">$</text>
+  </svg>`;
+
   const SB_URL = 'https://vbkeiyrrujxmavvhtbve.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZia2VpeXJydWp4bWF2dmh0YnZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTgwNDgsImV4cCI6MjA5Njc3NDA0OH0.eZUC4X-p8qFRT-Ga_xAxAWaOH5WQexEXgtJGul242Fo';
 
@@ -159,10 +179,8 @@
     const res = await fetch(SB_URL + path, {
       ...opts,
       headers: {
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + SB_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation',
+        'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=representation',
         ...(opts.headers || {})
       }
     });
@@ -177,11 +195,8 @@
     const err = document.getElementById('auth-err');
     err.textContent = '';
     if (!username || !password) { err.textContent = 'fill in both fields'; return; }
-
     if (isRegister) {
-      if (wallet && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) {
-        err.textContent = 'wallet address looks wrong'; return;
-      }
+      if (wallet && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) { err.textContent = 'wallet address looks wrong'; return; }
       const check = await sbFetch('/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=username');
       if (check.data && check.data.length > 0) { err.textContent = 'username taken'; return; }
       const body = { username, password };
@@ -196,7 +211,6 @@
       if (w) localStorage.setItem('h00d_wallet', w); else localStorage.removeItem('h00d_wallet');
       currentWallet = w || null;
     }
-
     currentUser = username;
     localStorage.setItem('h00d_user', username);
     showFeed();
@@ -229,8 +243,7 @@
 
   function logout() {
     currentUser = null; currentWallet = null;
-    localStorage.removeItem('h00d_user');
-    localStorage.removeItem('h00d_wallet');
+    localStorage.removeItem('h00d_user'); localStorage.removeItem('h00d_wallet');
     show('p1');
   }
 
@@ -261,7 +274,8 @@
       <div id="post-${i}">
         <div class="p-meta">
           <span class="who">${esc(p.username)}</span>
-          · ${timeAgo(p.created_at)}
+          <span style="color:#2a2a2a">·</span>
+          <span>${timeAgo(p.created_at)}</span>
           ${p.username !== currentUser ? `<span id="sol-btn-${i}"></span>` : ''}
         </div>
         <div class="p-body">${esc(p.body)}</div>
@@ -273,7 +287,7 @@
       const w = await getWallet(p.username);
       if (!w) return;
       const el = document.getElementById('sol-btn-' + i);
-      if (el) el.innerHTML = `<button class="send-sol-btn" onclick="openModal('${esc(p.username)}','${w}')">⬡ send sol</button>`;
+      if (el) el.innerHTML = `<button class="bag-btn" title="send SOL to @${esc(p.username)}" onclick="openModal('${esc(p.username)}','${w}')">${BAG_SVG}</button>`;
     });
   }
 
@@ -301,33 +315,23 @@
     const amount = parseFloat(document.getElementById('sol-amount').value);
     if (!amount || amount <= 0) { err.textContent = 'enter an amount'; return; }
     if (!_solTo) return;
-
     const provider = window.solana || window.phantom?.solana;
-    if (!provider || !provider.isPhantom) {
-      err.textContent = 'phantom not found — install phantom.app'; return;
-    }
-
+    if (!provider || !provider.isPhantom) { err.textContent = 'phantom not found — install phantom.app'; return; }
     try {
       await provider.connect();
       const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, clusterApiUrl } =
         await import('https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.browser.esm.js');
-
       const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
       const fromPubkey = provider.publicKey;
       const toPubkey   = new PublicKey(_solTo.wallet);
       const lamports   = Math.round(amount * LAMPORTS_PER_SOL);
-
-      const tx = new Transaction().add(
-        SystemProgram.transfer({ fromPubkey, toPubkey, lamports })
-      );
+      const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
       const { blockhash } = await connection.getLatestBlockhash();
       tx.recentBlockhash = blockhash;
       tx.feePayer = fromPubkey;
-
       const signed = await provider.signTransaction(tx);
       const sig    = await connection.sendRawTransaction(signed.serialize());
       await connection.confirmTransaction(sig, 'confirmed');
-
       suc.textContent = '✓ sent! tx: ' + sig.slice(0, 12) + '…';
       await sbFetch('/rest/v1/posts', {
         method: 'POST',
