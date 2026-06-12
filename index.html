@@ -193,18 +193,15 @@
       if (password.length < 6) { err.textContent = 'password min 6 characters'; return; }
       if (wallet && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) { err.textContent = 'wallet address looks wrong'; return; }
 
-      // check username taken
       const { data: existing } = await sb.from('profiles').select('username').eq('username', username).single();
       if (existing) { err.textContent = 'username taken'; return; }
 
-      // sign up with supabase auth using username@h00d.fun as fake email
       const { data, error } = await sb.auth.signUp({
         email: username + '@h00d.fun',
         password,
       });
       if (error) { err.textContent = error.message; return; }
 
-      // create profile
       const profileData = { id: data.user.id, username };
       if (wallet) profileData.wallet = wallet;
       await sb.from('profiles').insert(profileData);
@@ -214,7 +211,6 @@
       showFeed();
 
     } else {
-      // look up username to get fake email
       const { data: profile } = await sb.from('profiles').select('username').eq('username', username).single();
       if (!profile) { err.textContent = 'wrong username or password'; return; }
 
@@ -261,7 +257,7 @@
     show('p1');
   }
 
-  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
   function timeAgo(ts) {
     const diff = Math.floor((Date.now() - new Date(ts)) / 1000);
@@ -301,7 +297,13 @@
       const w = await getWallet(p.username);
       if (!w) return;
       const el = document.getElementById('sol-btn-' + i);
-      if (el) el.innerHTML = `<button class="bag-btn" title="send SOL to @${esc(p.username)}" onclick="openModal('${esc(p.username)}','${w}')">${BAG_SVG}</button>`;
+      if (!el) return;
+      const btn = document.createElement('button');
+      btn.className = 'bag-btn';
+      btn.title = 'send SOL to @' + p.username;
+      btn.innerHTML = BAG_SVG;
+      btn.addEventListener('click', () => openModal(p.username, w));
+      el.appendChild(btn);
     });
   }
 
