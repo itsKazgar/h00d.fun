@@ -26,22 +26,46 @@
     #p3 { flex-direction: column; padding: 2.5rem 3rem; gap: 1.5rem; }
     .topbar { display: flex; align-items: center; justify-content: space-between; }
     .topbar-user { font-size: 16px; color: #33ff33; letter-spacing: 2px; }
-    .logout-btn { background: none; border: none; font-family: 'VT323', monospace; font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .logout-btn, .nav-btn { background: none; border: none; font-family: 'VT323', monospace; font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; }
     .logout-btn:hover { color: #ff4444; }
+    .nav-btn:hover { color: #33ff33; }
     .feed-wrap { border-top: 1px solid #1a1a1a; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
     .p-meta { font-size: 14px; color: #333; display: flex; align-items: center; gap: 8px; }
-    .p-meta .who { color: #33ff33; }
+    .p-meta .who { color: #33ff33; cursor: pointer; }
+    .p-meta .who:hover { color: #fff; text-decoration: underline; }
     .p-body { font-size: 20px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .post-row { cursor: pointer; }
+    .post-row:hover .p-body { color: #fff; }
+    .reply-count { font-size: 13px; color: #2a7a2a; letter-spacing: 1px; margin-top: 4px; }
     .loading { font-size: 16px; color: #333; letter-spacing: 2px; }
-    .bag-btn { background: none; border: none; cursor: pointer; padding: 0; opacity: 0.4; transition: opacity 0.15s, transform 0.15s; display: inline-flex; align-items: center; vertical-align: middle; }
+    .back-link { font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; margin-bottom: 0.5rem; }
+    .back-link:hover { color: #33ff33; }
+    .reply { margin-left: 1.5rem; border-left: 1px solid #1a1a1a; padding-left: 1rem; }
+    .bag-btn { background: none; border: none; cursor: pointer; padding: 0; opacity: 0.7; transition: opacity 0.15s, transform 0.15s; display: inline-flex; align-items: center; vertical-align: middle; }
     .bag-btn:hover { opacity: 1; transform: scale(1.15); }
+    #p4, #p5, #p6 { flex-direction: column; padding: 2.5rem 3rem; gap: 1.5rem; }
+    .prof-head { display: flex; flex-direction: column; gap: 0.5rem; border-bottom: 1px solid #1a1a1a; padding-bottom: 1.25rem; }
+    .prof-name { font-size: 26px; color: #33ff33; letter-spacing: 2px; }
+    .prof-actions { display: flex; align-items: center; gap: 18px; margin-top: 6px; flex-wrap: wrap; }
+    .prof-action { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid #1e3a1e; font-family: 'VT323', monospace; font-size: 15px; color: #2a7a2a; cursor: pointer; letter-spacing: 1px; padding: 4px 12px; }
+    .prof-action:hover { border-color: #33ff33; color: #33ff33; }
+    .prof-nowallet { font-size: 13px; color: #333; letter-spacing: 1px; word-break: break-all; }
+    .dm-wrap { display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px solid #1a1a1a; padding-top: 1.25rem; flex: 1; overflow-y: auto; }
+    .dm-line { font-size: 18px; line-height: 1.4; word-break: break-word; }
+    .dm-line .dm-from { color: #33ff33; }
+    .dm-line.them .dm-from { color: #00bcd4; }
+    .dm-line .dm-text { color: #ccc; }
+    .dm-compose { display: flex; align-items: center; gap: 12px; border-top: 1px solid #1a1a1a; padding-top: 1rem; }
     #sol-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; z-index: 100; }
     #sol-modal.open { display: flex; }
-    .sol-box { background: #0d0d0d; border: 1px solid #1e3a1e; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 280px; }
+    .sol-box { background: #0d0d0d; border: 1px solid #1e3a1e; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 280px; max-width: 360px; }
     .sol-box-title { font-size: 18px; color: #33ff33; letter-spacing: 3px; }
     .sol-to { font-size: 14px; color: #444; letter-spacing: 1px; }
     .sol-to span { color: #33ff33; }
     .sol-addr { font-size: 11px; color: #222; letter-spacing: 1px; word-break: break-all; margin-top: -6px; }
+    .sol-warn { font-size: 12px; color: #888; letter-spacing: 0.5px; line-height: 1.4; border: 1px solid #1e1e1e; padding: 8px 10px; }
+    .sol-warn b { color: #33ff33; }
     .sol-err { font-size: 13px; color: #ff4444; min-height: 16px; }
     .sol-success { font-size: 13px; color: #33ff33; min-height: 16px; }
     .sol-close { font-size: 13px; color: #333; cursor: pointer; letter-spacing: 2px; }
@@ -56,8 +80,9 @@
     input[type=text], input[type=password] { font-size: 18px !important; letter-spacing: 2px; width: 260px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; }
     input[type=number] { font-size: 18px !important; letter-spacing: 2px; width: 160px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; }
     input::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
-    textarea#msg { font-size: 20px !important; resize: none; width: 100%; line-height: 1.5; letter-spacing: 1px; }
-    textarea#msg::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
+    textarea.msgbox { font-size: 20px !important; resize: none; width: 100%; line-height: 1.5; letter-spacing: 1px; }
+    textarea.msgbox::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
+    .dm-input { flex: 1; font-size: 18px !important; letter-spacing: 1px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; width: auto; }
     button.action { background: none; border: none; font-family: 'VT323', monospace; font-size: 18px; color: #33ff33; cursor: pointer; letter-spacing: 3px; }
     button.action:hover { color: #fff; }
   </style>
@@ -87,14 +112,48 @@
   <div class="auth-toggle" id="auth-toggle">no account? <span onclick="toggleMode()">register</span></div>
 </div>
 
+<!-- MAIN FEED -->
 <div class="page" id="p3">
   <div class="topbar">
     <div class="topbar-user" id="topbar-user"></div>
-    <button class="logout-btn" onclick="logout()">[ logout ]</button>
+    <div class="topbar-right">
+      <button class="nav-btn" id="myprofile-btn">[ my profile ]</button>
+      <button class="logout-btn" onclick="logout()">[ logout ]</button>
+    </div>
   </div>
-  <textarea id="msg" rows="3" placeholder="say something..."></textarea>
+  <textarea class="msgbox" id="msg" rows="3" placeholder="say something..."></textarea>
   <button class="action" onclick="doPost()">[ post ]</button>
   <div class="feed-wrap" id="feed"><div class="loading">loading...</div></div>
+</div>
+
+<!-- THREAD VIEW -->
+<div class="page" id="p5">
+  <div class="back-link" id="thread-back">← back to feed</div>
+  <div id="thread-root"></div>
+  <textarea class="msgbox" id="reply-msg" rows="2" placeholder="reply..."></textarea>
+  <button class="action" onclick="doReply()">[ reply ]</button>
+  <div class="feed-wrap" id="thread-replies"></div>
+</div>
+
+<!-- PROFILE VIEW -->
+<div class="page" id="p4">
+  <div class="back-link" id="prof-back">← back</div>
+  <div class="prof-head">
+    <div class="prof-name" id="prof-name"></div>
+    <div class="prof-actions" id="prof-actions"></div>
+  </div>
+  <div class="feed-wrap" id="prof-posts"><div class="loading">loading...</div></div>
+</div>
+
+<!-- DM VIEW -->
+<div class="page" id="p6">
+  <div class="back-link" id="dm-back">← back</div>
+  <div class="prof-name" id="dm-with"></div>
+  <div class="dm-wrap" id="dm-thread"><div class="loading">loading...</div></div>
+  <div class="dm-compose">
+    <input class="dm-input" type="text" id="dm-input" placeholder="message..." maxlength="500" autocomplete="off" />
+    <button class="action" onclick="sendDm()">[ send ]</button>
+  </div>
 </div>
 
 <div id="sol-modal">
@@ -106,6 +165,7 @@
       <div class="field-label">AMOUNT (SOL)</div>
       <input type="number" id="sol-amount" placeholder="0.01" min="0.001" step="0.001" />
     </div>
+    <div class="sol-warn">⚠ <b>real mainnet transfer.</b> check the amount and address above — crypto sends cannot be reversed.</div>
     <div class="sol-err" id="sol-err"></div>
     <div class="sol-success" id="sol-success"></div>
     <button class="action" onclick="sendSol()">[ send ]</button>
@@ -114,7 +174,7 @@
 </div>
 
 <script>
-  const BAG_SVG = `<svg width="18" height="20" viewBox="0 0 120 170" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  const BAG_SVG = `<svg width="20" height="22" viewBox="0 0 120 170" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
     <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"
       d="M60 30 C52 30 44 26 44 20 C44 14 50 10 58 12 C54 6 56 0 62 0 C68 0 72 4 72 10 C72 8 76 6 80 8 C86 10 86 18 80 22 C78 24 74 26 70 28 C68 30 64 30 60 30 Z"/>
     <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"
@@ -134,6 +194,8 @@
   let currentUser = null;
   let currentUsername = null;
   let isRegister = false;
+  let activeThreadId = null;
+  let dmPeer = null;
 
   const word = 'ENTER';
   let ti = 0;
@@ -143,7 +205,6 @@
   }
   setTimeout(typeIt, 300);
 
-  // check existing session on load
   async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
@@ -159,6 +220,12 @@
     if (document.getElementById('p2').classList.contains('active') && e.key === 'Enter') submitAuth();
     if (document.getElementById('p3').classList.contains('active') && e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); doPost(); }
   });
+
+  document.getElementById('myprofile-btn').addEventListener('click', () => openProfile(currentUsername));
+  document.getElementById('thread-back').addEventListener('click', showFeed);
+  document.getElementById('prof-back').addEventListener('click', showFeed);
+  document.getElementById('dm-back').addEventListener('click', () => openProfile(dmPeer));
+  document.getElementById('dm-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendDm(); });
 
   function show(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -196,10 +263,7 @@
       const { data: existing } = await sb.from('profiles').select('username').eq('username', username).single();
       if (existing) { err.textContent = 'username taken'; return; }
 
-      const { data, error } = await sb.auth.signUp({
-        email: username + '@h00d.fun',
-        password,
-      });
+      const { data, error } = await sb.auth.signUp({ email: username + '@h00d.fun', password });
       if (error) { err.textContent = error.message; return; }
 
       const profileData = { id: data.user.id, username };
@@ -209,15 +273,11 @@
       currentUser = data.user;
       currentUsername = username;
       showFeed();
-
     } else {
       const { data: profile } = await sb.from('profiles').select('username').eq('username', username).single();
       if (!profile) { err.textContent = 'wrong username or password'; return; }
 
-      const { data, error } = await sb.auth.signInWithPassword({
-        email: username + '@h00d.fun',
-        password,
-      });
+      const { data, error } = await sb.auth.signInWithPassword({ email: username + '@h00d.fun', password });
       if (error) { err.textContent = 'wrong username or password'; return; }
 
       currentUser = data.user;
@@ -229,26 +289,211 @@
   function showFeed() {
     document.getElementById('topbar-user').textContent = '~ ' + currentUsername;
     show('p3');
-    setTimeout(() => {
-      const t = document.getElementById('msg');
-      t.style.cssText += '-webkit-text-fill-color:#ffffff!important;color:#ffffff!important;';
-      t.focus();
-    }, 50);
+    setTimeout(() => { document.getElementById('msg').focus(); }, 50);
     loadPosts();
   }
 
+  // ---------- MAIN FEED (top-level posts only) ----------
   async function loadPosts() {
-    const { data, error } = await sb.from('posts').select('username, body, created_at').order('created_at', { ascending: false }).limit(100);
+    const { data, error } = await sb.from('posts')
+      .select('id, username, body, created_at, parent_id')
+      .is('parent_id', null)
+      .order('created_at', { ascending: false })
+      .limit(100);
     if (error) { document.getElementById('feed').innerHTML = '<div class="loading">error loading posts</div>'; return; }
-    render(data);
+
+    const ids = (data || []).map(p => p.id);
+    let counts = {};
+    if (ids.length) {
+      const { data: replies } = await sb.from('posts').select('parent_id').in('parent_id', ids);
+      (replies || []).forEach(r => { counts[r.parent_id] = (counts[r.parent_id] || 0) + 1; });
+    }
+    renderFeed(data, counts);
+  }
+
+  function renderFeed(posts, counts) {
+    const feed = document.getElementById('feed');
+    if (!posts || posts.length === 0) { feed.innerHTML = '<div class="loading">no posts yet. be first.</div>'; return; }
+    feed.innerHTML = '';
+    posts.forEach(p => {
+      const c = counts[p.id] || 0;
+      const row = document.createElement('div');
+      row.className = 'post-row';
+      row.innerHTML = `
+        <div class="p-meta">
+          <span class="who">${esc(p.username)}</span>
+          <span style="color:#2a2a2a">·</span>
+          <span>${timeAgo(p.created_at)}</span>
+        </div>
+        <div class="p-body">${esc(p.body)}</div>
+        ${c ? `<div class="reply-count">${c} ${c === 1 ? 'reply' : 'replies'} →</div>` : '<div class="reply-count" style="color:#222">reply →</div>'}`;
+      row.querySelector('.who').addEventListener('click', (e) => { e.stopPropagation(); openProfile(p.username); });
+      row.addEventListener('click', () => openThread(p.id));
+      feed.appendChild(row);
+    });
   }
 
   async function doPost() {
     const text = document.getElementById('msg').value.trim();
     if (!text) return;
-    await sb.from('posts').insert({ username: currentUsername, body: text, user_id: currentUser.id });
+    await sb.from('posts').insert({ username: currentUsername, body: text, user_id: currentUser.id, parent_id: null });
     document.getElementById('msg').value = '';
     loadPosts();
+  }
+
+  // ---------- THREAD VIEW ----------
+  async function openThread(postId) {
+    activeThreadId = postId;
+    show('p5');
+    document.getElementById('thread-root').innerHTML = '<div class="loading">loading...</div>';
+    document.getElementById('thread-replies').innerHTML = '';
+
+    const { data: root } = await sb.from('posts').select('id, username, body, created_at').eq('id', postId).single();
+    if (!root) { document.getElementById('thread-root').innerHTML = '<div class="loading">post not found</div>'; return; }
+
+    const rootEl = document.getElementById('thread-root');
+    rootEl.innerHTML = `
+      <div class="p-meta">
+        <span class="who" id="thread-root-user">${esc(root.username)}</span>
+        <span style="color:#2a2a2a">·</span>
+        <span>${timeAgo(root.created_at)}</span>
+      </div>
+      <div class="p-body">${esc(root.body)}</div>`;
+    rootEl.querySelector('#thread-root-user').addEventListener('click', () => openProfile(root.username));
+
+    const { data: replies } = await sb.from('posts')
+      .select('id, username, body, created_at')
+      .eq('parent_id', postId)
+      .order('created_at', { ascending: true });
+
+    const rc = document.getElementById('thread-replies');
+    rc.innerHTML = '';
+    (replies || []).forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'reply';
+      el.innerHTML = `
+        <div class="p-meta">
+          <span class="who">${esc(r.username)}</span>
+          <span style="color:#2a2a2a">·</span>
+          <span>${timeAgo(r.created_at)}</span>
+        </div>
+        <div class="p-body">${esc(r.body)}</div>`;
+      el.querySelector('.who').addEventListener('click', () => openProfile(r.username));
+      rc.appendChild(el);
+    });
+    if (!replies || replies.length === 0) rc.innerHTML = '<div class="loading" style="margin-left:1.5rem">no replies yet.</div>';
+  }
+
+  async function doReply() {
+    if (!activeThreadId) return;
+    const text = document.getElementById('reply-msg').value.trim();
+    if (!text) return;
+    await sb.from('posts').insert({ username: currentUsername, body: text, user_id: currentUser.id, parent_id: activeThreadId });
+    document.getElementById('reply-msg').value = '';
+    openThread(activeThreadId);
+  }
+
+  // ---------- PROFILE VIEW ----------
+  async function openProfile(username) {
+    show('p4');
+    document.getElementById('prof-name').textContent = '~ ' + username;
+    document.getElementById('prof-actions').innerHTML = '';
+    document.getElementById('prof-posts').innerHTML = '<div class="loading">loading...</div>';
+
+    const { data: profile } = await sb.from('profiles').select('username, wallet').eq('username', username).single();
+
+    const actions = document.getElementById('prof-actions');
+    if (username !== currentUsername) {
+      const msgBtn = document.createElement('button');
+      msgBtn.className = 'prof-action';
+      msgBtn.textContent = '✉ message';
+      msgBtn.addEventListener('click', () => openDm(username));
+      actions.appendChild(msgBtn);
+
+      if (profile && profile.wallet) {
+        const solBtn = document.createElement('button');
+        solBtn.className = 'prof-action';
+        solBtn.innerHTML = BAG_SVG + '<span>send sol</span>';
+        solBtn.addEventListener('click', () => openModal(username, profile.wallet));
+        actions.appendChild(solBtn);
+      } else {
+        const none = document.createElement('span');
+        none.className = 'prof-nowallet';
+        none.textContent = 'no wallet set';
+        actions.appendChild(none);
+      }
+    } else {
+      const me = document.createElement('span');
+      me.className = 'prof-nowallet';
+      me.textContent = profile && profile.wallet ? 'your wallet: ' + profile.wallet : 'no wallet set';
+      actions.appendChild(me);
+    }
+
+    const { data: posts } = await sb.from('posts')
+      .select('id, username, body, created_at')
+      .eq('username', username)
+      .is('parent_id', null)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    const pc = document.getElementById('prof-posts');
+    if (!posts || posts.length === 0) { pc.innerHTML = '<div class="loading">no posts yet.</div>'; return; }
+    pc.innerHTML = '';
+    posts.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'post-row';
+      row.innerHTML = `
+        <div class="p-meta"><span style="color:#333">${timeAgo(p.created_at)}</span></div>
+        <div class="p-body">${esc(p.body)}</div>`;
+      row.addEventListener('click', () => openThread(p.id));
+      pc.appendChild(row);
+    });
+  }
+
+  // ---------- DIRECT MESSAGES ----------
+  async function openDm(username) {
+    dmPeer = username;
+    show('p6');
+    document.getElementById('dm-with').textContent = '~ ' + username;
+    document.getElementById('dm-thread').innerHTML = '<div class="loading">loading...</div>';
+    await loadDm();
+    setTimeout(() => document.getElementById('dm-input').focus(), 50);
+  }
+
+  async function loadDm() {
+    const { data, error } = await sb.from('messages')
+      .select('sender, recipient, body, created_at')
+      .or(`and(sender.eq.${currentUsername},recipient.eq.${dmPeer}),and(sender.eq.${dmPeer},recipient.eq.${currentUsername})`)
+      .order('created_at', { ascending: true })
+      .limit(200);
+
+    const box = document.getElementById('dm-thread');
+    if (error) { box.innerHTML = '<div class="loading">error loading messages</div>'; return; }
+    if (!data || data.length === 0) { box.innerHTML = '<div class="loading">no messages yet. say hi.</div>'; return; }
+    box.innerHTML = '';
+    data.forEach(m => {
+      const mine = m.sender === currentUsername;
+      const el = document.createElement('div');
+      el.className = 'dm-line' + (mine ? '' : ' them');
+      el.innerHTML = `<span class="dm-from">${esc(m.sender)}:</span> <span class="dm-text">${esc(m.body)}</span>`;
+      box.appendChild(el);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function sendDm() {
+    const input = document.getElementById('dm-input');
+    const text = input.value.trim();
+    if (!text || !dmPeer) return;
+    const { error } = await sb.from('messages').insert({
+      sender: currentUsername,
+      recipient: dmPeer,
+      sender_id: currentUser.id,
+      body: text
+    });
+    if (error) { return; }
+    input.value = '';
+    loadDm();
   }
 
   async function logout() {
@@ -267,46 +512,7 @@
     return Math.floor(diff/86400) + 'd ago';
   }
 
-  const walletCache = {};
-  async function getWallet(username) {
-    if (walletCache[username] !== undefined) return walletCache[username];
-    const { data } = await sb.from('profiles').select('wallet').eq('username', username).single();
-    const w = (data && data.wallet) || null;
-    walletCache[username] = w;
-    return w;
-  }
-
-  async function render(posts) {
-    if (!posts || posts.length === 0) {
-      document.getElementById('feed').innerHTML = '<div class="loading">no posts yet. be first.</div>'; return;
-    }
-    document.getElementById('feed').innerHTML = posts.map((p, i) => `
-      <div id="post-${i}">
-        <div class="p-meta">
-          <span class="who">${esc(p.username)}</span>
-          <span style="color:#2a2a2a">·</span>
-          <span>${timeAgo(p.created_at)}</span>
-          ${p.username !== currentUsername ? `<span id="sol-btn-${i}"></span>` : ''}
-        </div>
-        <div class="p-body">${esc(p.body)}</div>
-      </div>
-    `).join('');
-
-    posts.forEach(async (p, i) => {
-      if (p.username === currentUsername) return;
-      const w = await getWallet(p.username);
-      if (!w) return;
-      const el = document.getElementById('sol-btn-' + i);
-      if (!el) return;
-      const btn = document.createElement('button');
-      btn.className = 'bag-btn';
-      btn.title = 'send SOL to @' + p.username;
-      btn.innerHTML = BAG_SVG;
-      btn.addEventListener('click', () => openModal(p.username, w));
-      el.appendChild(btn);
-    });
-  }
-
+  // ---------- SEND SOL (launched from profiles only) ----------
   let _solTo = null;
 
   function openModal(username, wallet) {
@@ -349,8 +555,8 @@
       const sig    = await connection.sendRawTransaction(signed.serialize());
       await connection.confirmTransaction(sig, 'confirmed');
       suc.textContent = '✓ sent! tx: ' + sig.slice(0, 12) + '…';
-      await sb.from('posts').insert({ username: currentUsername, body: `⬡ sent ${amount} SOL to @${_solTo.username}`, user_id: currentUser.id });
-      setTimeout(() => { closeModal(); loadPosts(); }, 1800);
+      await sb.from('posts').insert({ username: currentUsername, body: `⬡ sent ${amount} SOL to @${_solTo.username}`, user_id: currentUser.id, parent_id: null });
+      setTimeout(() => { closeModal(); }, 1800);
     } catch(e) {
       err.textContent = e.message || 'transaction failed';
     }
