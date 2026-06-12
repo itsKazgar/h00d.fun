@@ -233,8 +233,26 @@
 
   document.addEventListener('keydown', e => {
     if (document.getElementById('p1').classList.contains('active') && e.key === 'Enter') showAuth();
-    if (document.getElementById('p2').classList.contains('active') && e.key === 'Enter') submitAuth();
     if (document.getElementById('p3').classList.contains('active') && e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); doPost(); }
+  });
+
+  // ---- auth field Enter-chaining ----
+  // username -> password -> (wallet if visible) -> submit
+  document.getElementById('auth-user').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('auth-pass').focus(); }
+  });
+  document.getElementById('auth-pass').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const walletVisible = document.getElementById('wallet-field').style.display !== 'none';
+    if (walletVisible) {
+      document.getElementById('auth-wallet').focus();   // register: go to wallet next
+    } else {
+      submitAuth();                                     // login: enter = log in
+    }
+  });
+  document.getElementById('auth-wallet').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); submitAuth(); }  // register: enter on wallet submits (blank = skip)
   });
 
   document.getElementById('topbar-user').addEventListener('click', () => openProfile(currentUsername));
@@ -450,7 +468,7 @@
 
       const editBtn = document.createElement('button');
       editBtn.className = 'prof-action';
-      editBtn.textContent = profile && profile.wallet ? '⚙ change wallet' : '⚙ add wallet';
+      editBtn.textContent = profile && profile.wallet ? 'change wallet' : 'add wallet';
       wrap.appendChild(editBtn);
 
       // hidden edit row
