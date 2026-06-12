@@ -59,6 +59,8 @@
     .dm-compose { display: flex; align-items: center; gap: 12px; border-top: 1px solid #1a1a1a; padding-top: 1rem; }
     #sol-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; z-index: 100; }
     #sol-modal.open { display: flex; }
+    #set-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; z-index: 100; }
+    #set-modal.open { display: flex; }
     .sol-box { background: #0d0d0d; border: 1px solid #1e3a1e; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 280px; max-width: 360px; }
     .sol-box-title { font-size: 18px; color: #33ff33; letter-spacing: 3px; }
     .sol-to { font-size: 14px; color: #444; letter-spacing: 1px; }
@@ -115,9 +117,8 @@
 <!-- MAIN FEED -->
 <div class="page" id="p3">
   <div class="topbar">
-    <div class="topbar-user" id="topbar-user"></div>
+    <div class="topbar-user" id="topbar-user" style="cursor:pointer"></div>
     <div class="topbar-right">
-      <button class="nav-btn" id="myprofile-btn">[ my profile ]</button>
       <button class="logout-btn" onclick="logout()">[ logout ]</button>
     </div>
   </div>
@@ -173,6 +174,21 @@
   </div>
 </div>
 
+<div id="set-modal">
+  <div class="sol-box">
+    <div class="sol-box-title">wallet settings</div>
+    <div>
+      <div class="field-label">SOLANA WALLET</div>
+      <input type="text" id="set-wallet" placeholder="your public key" maxlength="44" autocomplete="off" spellcheck="false" />
+    </div>
+    <div style="font-size:12px;color:#888;letter-spacing:0.5px;line-height:1.4;">this is the address others send SOL to. leave blank to remove it.</div>
+    <div class="sol-err" id="set-err"></div>
+    <div class="sol-success" id="set-success"></div>
+    <button class="action" onclick="saveWallet()">[ save ]</button>
+    <span class="sol-close" onclick="closeSettings()">← cancel</span>
+  </div>
+</div>
+
 <script>
   const BAG_SVG = `<svg width="20" height="22" viewBox="0 0 120 170" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
     <path stroke="#33ff33" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"
@@ -221,7 +237,7 @@
     if (document.getElementById('p3').classList.contains('active') && e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); doPost(); }
   });
 
-  document.getElementById('myprofile-btn').addEventListener('click', () => openProfile(currentUsername));
+  document.getElementById('topbar-user').addEventListener('click', () => openProfile(currentUsername));
   document.getElementById('thread-back').addEventListener('click', showFeed);
   document.getElementById('prof-back').addEventListener('click', showFeed);
   document.getElementById('dm-back').addEventListener('click', () => openProfile(dmPeer));
@@ -423,10 +439,45 @@
         actions.appendChild(none);
       }
     } else {
-      const me = document.createElement('span');
-      me.className = 'prof-nowallet';
-      me.textContent = profile && profile.wallet ? 'your wallet: ' + profile.wallet : 'no wallet set';
-      actions.appendChild(me);
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:100%';
+
+      const current = document.createElement('span');
+      current.className = 'prof-nowallet';
+      current.id = 'my-wallet-display';
+      current.textContent = profile && profile.wallet ? 'wallet: ' + profile.wallet : 'no wallet set';
+      wrap.appendChild(current);
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'prof-action';
+      editBtn.textContent = profile && profile.wallet ? '⚙ change wallet' : '⚙ add wallet';
+      wrap.appendChild(editBtn);
+
+      // hidden edit row
+      const editRow = document.createElement('div');
+      editRow.style.cssText = 'display:none;flex-direction:column;gap:8px;margin-top:4px';
+      editRow.innerHTML = `
+        <input type="text" id="wallet-edit-input" placeholder="solana public key" maxlength="44" autocomplete="off" spellcheck="false" style="width:100%" />
+        <div class="wallet-hint" id="wallet-edit-msg">paste your wallet address, or leave blank to remove</div>
+        <div style="display:flex;gap:14px">
+          <button class="prof-action" id="wallet-save-btn">save</button>
+          <button class="prof-action" id="wallet-cancel-btn" style="border-color:#1e1e1e;color:#555">cancel</button>
+        </div>`;
+      wrap.appendChild(editRow);
+      actions.appendChild(wrap);
+
+      editBtn.addEventListener('click', () => {
+        editRow.style.display = 'flex';
+        editBtn.style.display = 'none';
+        const inp = document.getElementById('wallet-edit-input');
+        inp.value = (profile && profile.wallet) || '';
+        inp.focus();
+      });
+      editRow.querySelector('#wallet-cancel-btn').addEventListener('click', () => {
+        editRow.style.display = 'none';
+        editBtn.style.display = 'inline-flex';
+      });
+      editRow.querySelector('#wallet-save-btn').addEventListener('click', () => saveWallet());
     }
 
     const { data: posts } = await sb.from('posts')
@@ -448,6 +499,31 @@
       row.addEventListener('click', () => openThread(p.id));
       pc.appendChild(row);
     });
+  }
+
+  // ---------- WALLET SETTINGS (own profile only) ----------
+  async function saveWallet() {
+    const inp = document.getElementById('wallet-edit-input');
+    const msg = document.getElementById('wallet-edit-msg');
+    const val = inp.value.trim();
+    // allow empty (removes wallet) or a valid-looking solana address
+    if (val && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val)) {
+      msg.style.color = '#ff4444';
+      msg.textContent = 'that does not look like a valid wallet address';
+      return;
+    }
+    msg.style.color = '#333';
+    msg.textContent = 'saving...';
+    const { error } = await sb.from('profiles')
+      .update({ wallet: val || null })
+      .eq('id', currentUser.id);
+    if (error) {
+      msg.style.color = '#ff4444';
+      msg.textContent = 'error saving — try again';
+      return;
+    }
+    // refresh the profile so the new wallet shows everywhere
+    openProfile(currentUsername);
   }
 
   // ---------- DIRECT MESSAGES ----------
