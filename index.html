@@ -6,6 +6,7 @@
   <title>h00d.fun</title>
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #0d0d0d; min-height: 100vh; font-family: 'VT323', monospace; color: #33ff33; }
@@ -70,6 +71,12 @@
     .sol-addr { font-size: 11px; color: #222; letter-spacing: 1px; word-break: break-all; margin-top: -6px; }
     .sol-warn { font-size: 12px; color: #888; letter-spacing: 0.5px; line-height: 1.4; border: 1px solid #1e1e1e; padding: 8px 10px; }
     .sol-warn b { color: #33ff33; }
+    .sol-method { text-align: left; border: 1px solid #1e3a1e !important; padding: 10px 14px !important; font-size: 16px !important; letter-spacing: 1px !important; width: 100%; }
+    .sol-method:hover { border-color: #33ff33 !important; background: rgba(51,255,51,0.04); }
+    #sol-methods { display: flex; flex-direction: column; gap: 10px; }
+    .sol-qr-canvas { display: flex; align-items: center; justify-content: center; background: #fff; padding: 16px; align-self: center; }
+    .sol-qr-canvas canvas, .sol-qr-canvas img { display: block; }
+    .sol-hint { font-size: 13px; color: #555; letter-spacing: 1px; text-align: center; }
     .sol-err { font-size: 13px; color: #ff4444; min-height: 16px; }
     .sol-success { font-size: 13px; color: #33ff33; min-height: 16px; }
     .sol-close { font-size: 13px; color: #333; cursor: pointer; letter-spacing: 2px; }
@@ -164,17 +171,42 @@
     <div class="sol-box-title">send sol</div>
     <div class="sol-to">to: <span id="sol-to-name"></span></div>
     <div class="sol-addr" id="sol-to-addr"></div>
-    <div>
-      <div class="field-label">AMOUNT (SOL)</div>
-      <input type="number" id="sol-amount" placeholder="0.01" min="0.001" step="0.001" />
+
+    <!-- STEP 1: pick a method -->
+    <div id="sol-methods">
+      <button class="action sol-method" onclick="solMethod('inapp')">▸ send in-app (phantom)</button>
+      <button class="action sol-method" onclick="solMethod('qr')">▸ show QR code</button>
+      <button class="action sol-method" onclick="solMethod('copy')">▸ copy address</button>
     </div>
-    <div class="sol-warn">⚠ <b>real mainnet transfer.</b> check the amount and address above — crypto sends cannot be reversed.</div>
-    <div class="sol-err" id="sol-err"></div>
-    <div class="sol-success" id="sol-success"></div>
-    <button class="action" onclick="sendSol()">[ send ]</button>
-    <span class="sol-close" onclick="closeModal()">← cancel</span>
+
+    <!-- STEP 2a: in-app -->
+    <div id="sol-inapp" style="display:none">
+      <div>
+        <div class="field-label">AMOUNT (SOL)</div>
+        <input type="number" id="sol-amount" placeholder="0.01" min="0.001" step="0.001" />
+      </div>
+      <div class="sol-warn">⚠ <b>real mainnet transfer.</b> check the amount and address — crypto sends cannot be reversed.</div>
+      <div class="sol-err" id="sol-err"></div>
+      <div class="sol-success" id="sol-success"></div>
+      <button class="action" onclick="sendSol()">[ send ]</button>
+    </div>
+
+    <!-- STEP 2b: QR -->
+    <div id="sol-qr" style="display:none">
+      <div class="sol-qr-canvas" id="sol-qr-canvas"></div>
+      <div class="sol-hint">scan with any solana wallet app</div>
+    </div>
+
+    <!-- STEP 2c: copy -->
+    <div id="sol-copy" style="display:none">
+      <div class="sol-hint" id="sol-copy-status">tap below to copy the address</div>
+      <button class="action" onclick="copyAddr()">[ copy address ]</button>
+    </div>
+
+    <span class="sol-close" id="sol-close-link" onclick="closeModal()">← cancel</span>
   </div>
 </div>
+
 
 <div id="set-modal">
   <div class="sol-box">
@@ -599,6 +631,13 @@
   // ---------- SEND SOL (launched from profiles only) ----------
   let _solTo = null;
 
+  function resetModalViews() {
+    document.getElementById('sol-methods').style.display = 'flex';
+    document.getElementById('sol-inapp').style.display = 'none';
+    document.getElementById('sol-qr').style.display = 'none';
+    document.getElementById('sol-copy').style.display = 'none';
+  }
+
   function openModal(username, wallet) {
     _solTo = { username, wallet };
     document.getElementById('sol-to-name').textContent = '@' + username;
@@ -606,12 +645,55 @@
     document.getElementById('sol-amount').value = '';
     document.getElementById('sol-err').textContent = '';
     document.getElementById('sol-success').textContent = '';
+    document.getElementById('sol-copy-status').textContent = 'tap below to copy the address';
+    resetModalViews();
     document.getElementById('sol-modal').classList.add('open');
   }
 
   function closeModal() {
     document.getElementById('sol-modal').classList.remove('open');
     _solTo = null;
+  }
+
+  function solMethod(which) {
+    if (!_solTo) return;
+    document.getElementById('sol-methods').style.display = 'none';
+    if (which === 'inapp') {
+      document.getElementById('sol-inapp').style.display = 'block';
+    } else if (which === 'qr') {
+      document.getElementById('sol-qr').style.display = 'block';
+      renderQR(_solTo.wallet);
+    } else if (which === 'copy') {
+      document.getElementById('sol-copy').style.display = 'block';
+    }
+  }
+
+  function renderQR(wallet) {
+    const box = document.getElementById('sol-qr-canvas');
+    box.innerHTML = '';
+    // solana pay URI so wallets recognise it as a payment to this address
+    const uri = 'solana:' + wallet;
+    if (typeof QRCode === 'undefined') {
+      box.innerHTML = '<div style="color:#000;font-size:12px;padding:8px">QR library loading… try again</div>';
+      return;
+    }
+    QRCode.toCanvas(uri, { width: 240, margin: 1 }, (err, canvas) => {
+      if (err) { box.innerHTML = '<div style="color:#000;font-size:12px;padding:8px">could not make QR</div>'; return; }
+      box.appendChild(canvas);
+    });
+  }
+
+  async function copyAddr() {
+    if (!_solTo) return;
+    const status = document.getElementById('sol-copy-status');
+    try {
+      await navigator.clipboard.writeText(_solTo.wallet);
+      status.style.color = '#33ff33';
+      status.textContent = '✓ address copied';
+    } catch (e) {
+      status.style.color = '#ff4444';
+      status.textContent = 'could not copy — long-press the address above to copy';
+    }
   }
 
   async function sendSol() {
