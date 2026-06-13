@@ -631,8 +631,9 @@
       } catch (e1) {
         web3 = await import('https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/+esm');
       }
-      const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, clusterApiUrl } = web3;
-      const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
+      const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } = web3;
+      const RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=09fb7d5a-50cb-4b0a-8f9d-db40d1986eb4';
+      const connection = new Connection(RPC_URL, 'confirmed');
       const fromPubkey = provider.publicKey;
       const toPubkey   = new PublicKey(_solTo.wallet);
       const lamports   = Math.round(amount * LAMPORTS_PER_SOL);
