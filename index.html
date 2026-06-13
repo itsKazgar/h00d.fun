@@ -625,8 +625,13 @@
     if (!provider || !provider.isPhantom) { err.textContent = 'phantom not found — install phantom.app'; return; }
     try {
       await provider.connect();
-      const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, clusterApiUrl } =
-        await import('https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.browser.esm.js');
+      let web3;
+      try {
+        web3 = await import('https://esm.sh/@solana/web3.js@1.98.0?bundle');
+      } catch (e1) {
+        web3 = await import('https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/+esm');
+      }
+      const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, clusterApiUrl } = web3;
       const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
       const fromPubkey = provider.publicKey;
       const toPubkey   = new PublicKey(_solTo.wallet);
