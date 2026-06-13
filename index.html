@@ -9,15 +9,15 @@
   <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0d0d0d; min-height: 100vh; font-family: 'VT323', monospace; color: #33ff33; }
-    .page { display: none; min-height: 100vh; }
+    body { background: #0d0d0d; min-height: 100vh; min-height: 100dvh; font-family: 'VT323', monospace; color: #33ff33; }
+    .page { display: none; min-height: 100vh; min-height: 100dvh; }
     .page.active { display: flex; }
     #p1 { align-items: center; justify-content: center; }
     #enter-word { font-size: 28px; letter-spacing: 8px; color: #33ff33; cursor: pointer; }
     #enter-word:hover { color: #fff; }
     .cur-thin { display: inline-block; width: 2px; height: 18px; background: #33ff33; animation: bl 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
     @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
-    #p2 { flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem; padding: 2rem; }
+    #p2 { flex-direction: column; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 18vh 2rem 2rem; }
     .field-label { font-size: 13px; color: #444; letter-spacing: 3px; margin-bottom: 4px; }
     .err { font-size: 14px; color: #ff4444; letter-spacing: 1px; min-height: 18px; }
     .auth-toggle { font-size: 14px; color: #333; letter-spacing: 2px; }
