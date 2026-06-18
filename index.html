@@ -96,7 +96,13 @@
     .dm-input { flex: 1; font-size: 18px !important; letter-spacing: 1px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; width: auto; }
     button.action { background: none; border: none; font-family: 'VT323', monospace; font-size: 18px; color: #33ff33; cursor: pointer; letter-spacing: 3px; }
     button.action:hover { color: #fff; }
-  </style>
+    .menu-wrap{position:relative}
+  .menu-drop{display:none;position:absolute;right:0;top:26px;background:#0d0d0d;border:1px solid #1e3a1e;flex-direction:column;min-width:130px;z-index:200}
+  .menu-drop.open{display:flex}
+  .menu-item{background:none;border:none;font-family:'VT323',monospace;font-size:16px;color:#33ff33;text-align:left;padding:10px 16px;cursor:pointer;letter-spacing:2px}
+  .menu-item:hover{background:rgba(51,255,51,0.04);color:#fff}
+  .menu-item + .menu-item{border-top:1px solid #1a1a1a}
+</style>
 </head>
 <body>
 
@@ -128,9 +134,14 @@
   <div class="topbar">
     <div class="topbar-user" id="topbar-user" style="cursor:pointer"></div>
     <div class="topbar-right">
-    <button class="logout-btn" onclick="location.href='/swap'">[ swap ]</button>
-      <button class="logout-btn" onclick="logout()">[ logout ]</button>
+    <div class="menu-wrap">
+      <button class="nav-btn" id="menu-btn" onclick="toggleMenu(event)">[ menu ]</button>
+      <div class="menu-drop" id="menu-drop">
+        <button class="menu-item" onclick="location.href='/swap.html'">swap</button>
+        <button class="menu-item" onclick="logout()">logout</button>
+      </div>
     </div>
+  </div>
   </div>
   <textarea class="msgbox" id="msg" rows="3" placeholder="say something..."></textarea>
   <button class="action" onclick="doPost()">[ post ]</button>
@@ -754,6 +765,10 @@
       err.textContent = e.message || 'transaction failed';
     }
   }
+</script>
+<script>
+function toggleMenu(e){ e.stopPropagation(); document.getElementById('menu-drop').classList.toggle('open'); }
+document.addEventListener('click', function(){ var d=document.getElementById('menu-drop'); if(d) d.classList.remove('open'); });
 </script>
 </body>
 </html>
