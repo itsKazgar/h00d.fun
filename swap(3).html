@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>swap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<!-- Clean non-custodial Jupiter swap. Real Solana data, styled to match h00d.fun. -->
+<style>
+  /* Typography + colors lifted directly from h00d.fun (index.html) */
+  :root{ --bg:#0d0d0d; --green:#33ff33; --txt:#fff; --txt2:#ccc;
+         --g2:#222; --g3:#333; --g4:#444; --g5:#555;
+         --line:#1a1a1a; --line2:#1e1e1e; --box:#1e3a1e;
+         --red:#ff4444; --orange:#e0a040; --cy:#00bcd4; --mono:'VT323',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--green);font-family:var(--mono);font-size:20px;line-height:1.4;
+       min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem}
+  .wrap{width:100%;max-width:360px;position:relative}
+
+  .bar{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:1.4rem}
+  .title{color:var(--green);font-size:18px;letter-spacing:3px}
+  .lnk{background:none;border:none;font-family:var(--mono);color:var(--g3);font-size:14px;cursor:pointer;letter-spacing:2px}
+  .lnk:hover{color:var(--green)}
+
+  .field{margin-bottom:1.1rem}
+  .label{font-size:13px;color:var(--g4);letter-spacing:3px;margin-bottom:7px}
+  .line{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line2);padding-bottom:5px}
+  .amt{flex:1;min-width:0;background:none;border:none;outline:none;font-family:var(--mono);font-size:28px;
+       color:var(--txt);caret-color:var(--green);-webkit-text-fill-color:#fff}
+  .amt::placeholder{color:#2a2a2a;-webkit-text-fill-color:#2a2a2a}
+  .amt[readonly]{color:var(--txt2);-webkit-text-fill-color:var(--txt2)}
+  .tok{background:none;border:none;font-family:var(--mono);color:var(--txt);font-size:20px;cursor:pointer;
+       display:flex;align-items:center;gap:6px;white-space:nowrap;letter-spacing:1px}
+  .tok:hover{color:var(--green)}
+  .tok img{width:20px;height:20px;border-radius:50%}
+  .tok .car{color:var(--g4);font-size:14px}
+  .sub{display:flex;justify-content:space-between;font-size:14px;color:var(--g4);letter-spacing:1px;margin-top:6px}
+  .sub .r{display:flex;gap:12px;align-items:center}
+  .mini{background:none;border:none;font-family:var(--mono);color:var(--green);font-size:14px;cursor:pointer;letter-spacing:1px}
+  .mini:hover{color:#fff}
+
+  .arrow{display:block;margin:0 auto 0.6rem;background:none;border:none;color:var(--g3);font-size:18px;cursor:pointer}
+  .arrow:hover{color:var(--green)}
+
+  .quote{display:none;font-size:15px;letter-spacing:1px;margin:1.3rem 0;border-top:1px solid var(--line);padding-top:1rem}
+  .quote div{display:flex;justify-content:space-between;margin:4px 0}
+  .quote div span:first-child{color:var(--g4)}
+  .quote div span:last-child{color:var(--txt2)}
+
+  .slip{display:flex;align-items:center;gap:12px;font-size:15px;color:var(--g4);letter-spacing:1px;margin:1.3rem 0}
+  .slip .chip{cursor:pointer;color:var(--g5)}
+  .slip .chip:hover,.slip .chip.on{color:var(--green)}
+  .slip input{width:38px;background:none;border:none;border-bottom:1px solid var(--line2);font-family:var(--mono);
+              color:var(--txt);font-size:15px;outline:none;text-align:center;caret-color:var(--green)}
+
+  .cta{width:100%;background:none;border:1px solid var(--box);font-family:var(--mono);color:var(--green);
+       font-size:20px;letter-spacing:3px;padding:11px;cursor:pointer;margin-top:.2rem}
+  .cta:hover:not(:disabled){border-color:var(--green);background:rgba(51,255,51,.04);color:#fff}
+  .cta:disabled{color:var(--g3);cursor:not-allowed}
+  .msg{margin-top:14px;font-size:15px;min-height:18px;letter-spacing:1px;color:var(--g4)}
+  .note{color:var(--g3);font-size:13px;text-align:center;margin-top:6px;letter-spacing:1px}
+  .green{color:var(--green)!important} .red{color:var(--red)!important} .orange{color:var(--orange)!important}
+  .cy{color:var(--cy)!important} .dim{color:var(--g4)!important}
+  a{color:var(--green)}
+
+  .locked{display:none;color:var(--txt2);font-size:18px;text-align:center;padding:3rem 0;letter-spacing:2px}
+  .locked a{color:var(--green);cursor:pointer}
+
+  /* token search */
+  .search{display:none;position:absolute;inset:0;background:var(--bg);z-index:5;flex-direction:column}
+  .searchbar{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line2);padding-bottom:6px}
+  .searchbar input{flex:1;min-width:0;background:none;border:none;outline:none;font-family:var(--mono);
+                   font-size:20px;color:var(--txt);caret-color:var(--green)}
+  .searchbar input::placeholder{color:#2a2a2a}
+  .results{margin-top:8px;overflow:auto;max-height:60vh}
+  .res{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .res:hover{opacity:.65}
+  .res img{width:26px;height:26px;border-radius:50%}
+  .res .sym{color:var(--txt);font-size:18px;letter-spacing:1px}
+  .res .nm{color:var(--g4);font-size:13px}
+  .res .px{margin-left:auto;text-align:right}
+  .res .px .p{color:var(--green);font-size:15px}
+  .res .px .lq{color:var(--g4);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <span class="title">swap</span>
+    <button id="connect" class="lnk" style="display:none">[ connect ]</button>
+  </div>
+
+  <div id="locked" class="locked">log in to swap</div>
+
+  <div id="swapBody" style="display:none">
+    <div class="field">
+      <div class="label">you pay</div>
+      <div class="line">
+        <input id="amount" class="amt" type="number" min="0" step="any" placeholder="0.0" inputmode="decimal">
+        <button id="payTok" class="tok"><span id="payTokSym">SOL</span></button>
+      </div>
+      <div class="sub"><span id="payUsd"></span><span class="r"><span id="payBal"></span><button id="maxBtn" class="mini" style="display:none">max</button></span></div>
+    </div>
+
+    <button id="flipBtn" class="arrow" title="flip">↓</button>
+
+    <div class="field">
+      <div class="label">you get</div>
+      <div class="line">
+        <input id="recv" class="amt" type="text" placeholder="0.0" readonly>
+        <button id="recTok" class="tok"><img id="recTokImg" style="display:none"><span id="recTokSym">select</span><span class="car">▾</span></button>
+      </div>
+      <div class="sub"><span id="recUsd"></span><span class="r"><span id="recBal"></span></span></div>
+    </div>
+
+    <div id="quote" class="quote">
+      <div><span>rate</span><span id="q_rate">—</span></div>
+      <div><span>price impact</span><span id="q_impact">—</span></div>
+      <div><span>min received</span><span id="q_min">—</span></div>
+      <div><span>safety</span><span id="q_safe">—</span></div>
+      <div><span>route</span><span id="q_route">—</span></div>
+    </div>
+
+    <div class="slip">
+      <span>slippage</span>
+      <span class="chip" data-bps="50">0.5%</span>
+      <span class="chip on" data-bps="100">1%</span>
+      <span class="chip" data-bps="200">2%</span>
+      <input id="slipCustom" type="number" min="0" max="50" step="0.1" placeholder="%">
+    </div>
+
+    <button id="swapBtn" class="cta" disabled>[ connect wallet ]</button>
+    <div id="msg" class="msg dim"></div>
+    <div id="refreshNote" class="note"></div>
+  </div>
+
+  <div id="search" class="search">
+    <div class="searchbar">
+      <input id="searchInput" placeholder="search or paste a mint…" autocomplete="off">
+      <button id="searchClose" class="lnk">[ x ]</button>
+    </div>
+    <div id="results" class="results"></div>
+  </div>
+</div>
+
+<script type="module">
+import { Connection, VersionedTransaction } from 'https://esm.sh/@solana/web3.js@1.95.8';
+
+// ── config ──────────────────────────────────────────────────────────────
+const RPC   = 'https://api.mainnet-beta.solana.com'; // ⚠ replace with a Helius/QuickNode URL for real traffic
+const JUP   = 'https://lite-api.jup.ag';
+const DEX   = 'https://api.dexscreener.com/latest/dex';
+const LOGO  = m => `https://dd.dexscreener.com/ds-data/tokens/solana/${m}.png`;
+const SOL_MINT = 'So11111111111111111111111111111111111111112';
+const SOL_DEC  = 9;
+const MAX_SLIPPAGE_BPS = 5000;
+const QUOTE_TTL = 15;
+
+// ── login gate (Supabase session stored by the site, same-origin) ────────
+const REQUIRE_LOGIN  = true;
+const SB_PROJECT_REF  = 'vbkeiyrrujxmavvhtbve';
+function isLoggedIn(){
+  if (!REQUIRE_LOGIN) return true;
+  try{
+    const raw = localStorage.getItem('sb-'+SB_PROJECT_REF+'-auth-token');
+    if(!raw) return false;
+    const t = JSON.parse(raw);
+    const exp = t?.expires_at || t?.currentSession?.expires_at;
+    if(exp && exp*1000 < Date.now()) return false;
+    return !!(t?.access_token || t?.currentSession?.access_token);
+  }catch(e){ return false; }
+}
+
+const connection = new Connection(RPC, 'confirmed');
+const $ = id => document.getElementById(id);
+
+let wallet = null;
+let side = 'buy';
+let token = null;
+let slippageBps = 100;
+let quote = null, solUsd = 0, refreshTimer = null, countdown = 0;
+const decCache = { [SOL_MINT]: SOL_DEC };
+
+const fmt = (n,d=6) => Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
+function msg(t,cls){ const m=$('msg'); m.className='msg '+(cls||'dim'); m.innerHTML=t; }
+
+async function rpc(method, params){
+  const r = await fetch(RPC,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+  return (await r.json()).result;
+}
+async function getDecimals(mint){
+  if(mint in decCache) return decCache[mint];
+  try{ const r = await rpc('getTokenSupply',[mint]); decCache[mint]=r.value.decimals; return r.value.decimals; }
+  catch(e){ return 9; }
+}
+async function getSolUsd(){
+  try{ const r = await fetch(`${JUP}/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=${10**9}&slippageBps=50`);
+       solUsd = Number((await r.json()).outAmount)/1e6; }catch(e){}
+}
+
+function provider(){
+  return (window.phantom?.solana?.isPhantom && window.phantom.solana)
+      || (window.solana?.isPhantom && window.solana)
+      || (window.solflare?.isSolflare && window.solflare) || null;
+}
+$('connect').onclick = async () => {
+  const p = provider();
+  if(!p) return msg('no wallet found — install <a href="https://phantom.app" target="_blank">phantom</a>','red');
+  try{
+    const res = await p.connect(); wallet = p;
+    const pk = (res.publicKey||p.publicKey).toString();
+    $('connect').textContent = pk.slice(0,4)+'…'+pk.slice(-4);
+    refreshSwapBtn(); refreshBalances(); msg('wallet connected','green');
+  }catch(e){ msg('connection cancelled','dim'); }
+};
+async function refreshBalances(){
+  if(!wallet){ $('payBal').textContent=''; $('recBal').textContent=''; $('maxBtn').style.display='none'; return; }
+  const pk = wallet.publicKey.toString();
+  const sol = (await rpc('getBalance',[pk]))?.value/1e9 || 0;
+  let tokBal = 0;
+  if(token){
+    try{
+      const r = await rpc('getTokenAccountsByOwner',[pk,{mint:token.mint},{encoding:'jsonParsed'}]);
+      tokBal = r.value.reduce((s,a)=>s+ (a.account.data.parsed.info.tokenAmount.uiAmount||0),0);
+    }catch(e){}
+  }
+  const solStr = `◎ ${fmt(sol,4)}`;
+  const tokStr = token ? `${fmt(tokBal,4)} ${token.symbol}` : '';
+  if(side==='buy'){ $('payBal').textContent=solStr; $('recBal').textContent=token?tokStr:''; $('maxBtn').style.display=''; $('maxBtn').dataset.max=Math.max(sol-0.02,0); }
+  else            { $('payBal').textContent=token?tokStr:''; $('recBal').textContent=solStr; $('maxBtn').style.display=token?'':'none'; $('maxBtn').dataset.max=tokBal; }
+}
+$('maxBtn').onclick = () => { $('amount').value = $('maxBtn').dataset.max||0; scheduleQuote(); };
+
+$('recTok').onclick = openSearch;
+$('payTok').onclick = () => { if(side==='sell') openSearch(); };
+$('searchClose').onclick = () => $('search').style.display='none';
+function openSearch(){ $('search').style.display='flex'; $('searchInput').value=''; $('results').innerHTML=''; $('searchInput').focus(); }
+
+let searchT=null;
+$('searchInput').oninput = e => { clearTimeout(searchT); searchT=setTimeout(()=>runSearch(e.target.value.trim()),280); };
+async function runSearch(q){
+  if(!q){ $('results').innerHTML=''; return; }
+  $('results').innerHTML='<div class="dim" style="padding:8px 0">searching…</div>';
+  try{
+    const r = await fetch(`${DEX}/search?q=${encodeURIComponent(q)}`);
+    const pairs = (await r.json()).pairs||[];
+    const byMint = {};
+    for(const p of pairs){
+      if(p.chainId!=='solana' || !p.baseToken?.address) continue;
+      const m = p.baseToken.address, liq=(p.liquidity?.usd||0);
+      if(!byMint[m] || liq>byMint[m].liq) byMint[m]={mint:m,symbol:p.baseToken.symbol,name:p.baseToken.name,price:p.priceUsd,liq};
+    }
+    const list = Object.values(byMint).sort((a,b)=>b.liq-a.liq).slice(0,8);
+    if(!list.length){ $('results').innerHTML='<div class="dim" style="padding:8px 0">no tokens found</div>'; return; }
+    $('results').innerHTML='';
+    for(const t of list){
+      const el=document.createElement('div'); el.className='res';
+      el.innerHTML=`<img src="${LOGO(t.mint)}" onerror="this.style.visibility='hidden'">
+        <div><div class="sym">${t.symbol||'?'}</div><div class="nm">${(t.name||'').slice(0,22)}</div></div>
+        <div class="px"><div class="p">$${t.price?fmt(t.price,6):'—'}</div><div class="lq">liq $${fmt(t.liq,0)}</div></div>`;
+      el.onclick=()=>selectToken(t);
+      $('results').appendChild(el);
+    }
+  }catch(e){ $('results').innerHTML='<div class="red" style="padding:8px 0">search failed</div>'; }
+}
+async function selectToken(t){
+  $('search').style.display='none';
+  const decimals = await getDecimals(t.mint);
+  token = { mint:t.mint, symbol:t.symbol||t.mint.slice(0,4), name:t.name, decimals, logo:LOGO(t.mint), priceUsd:Number(t.price)||0 };
+  renderTokens(); refreshBalances(); scheduleQuote();
+}
+function renderTokens(){
+  const solBtn = `<span>SOL</span>`;
+  const tokBtn = token ? `<img src="${token.logo}" onerror="this.style.display='none'"><span>${token.symbol}</span>` : `<span>select</span><span class="car">▾</span>`;
+  if(side==='buy'){ $('payTok').innerHTML=solBtn; $('recTok').innerHTML=tokBtn; }
+  else            { $('payTok').innerHTML=tokBtn; $('recTok').innerHTML=solBtn; }
+}
+
+$('flipBtn').onclick = () => {
+  side = side==='buy'?'sell':'buy';
+  $('amount').value=''; $('recv').value=''; $('quote').style.display='none'; quote=null;
+  renderTokens(); refreshBalances(); refreshSwapBtn();
+  msg(side==='buy'?'buying with SOL':'selling for SOL','dim');
+};
+
+document.querySelectorAll('.slip .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('.slip .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); slippageBps=Number(c.dataset.bps); $('slipCustom').value=''; scheduleQuote();
+});
+$('slipCustom').oninput = e => {
+  const pct=parseFloat(e.target.value);
+  if(pct>0){ document.querySelectorAll('.slip .chip').forEach(x=>x.classList.remove('on'));
+    slippageBps=Math.min(Math.round(pct*100),MAX_SLIPPAGE_BPS); scheduleQuote(); }
+};
+
+$('amount').oninput = scheduleQuote;
+let quoteT=null;
+function scheduleQuote(){ clearTimeout(quoteT); quoteT=setTimeout(getQuote,350); }
+
+function direction(){
+  return side==='buy'
+    ? { inMint:SOL_MINT, inDec:SOL_DEC, outMint:token?.mint, outDec:token?.decimals, outSym:token?.symbol }
+    : { inMint:token?.mint, inDec:token?.decimals, outMint:SOL_MINT, outDec:SOL_DEC, outSym:'SOL' };
+}
+async function getQuote(){
+  stopRefresh();
+  quote=null; $('quote').style.display='none'; $('recv').value=''; refreshSwapBtn();
+  const amt=Number($('amount').value); const d=direction();
+  if(!token) return msg('pick a token','dim');
+  if(!amt||amt<=0) return msg('enter an amount','dim');
+  msg('fetching quote…','dim');
+
+  const amountRaw = Math.floor(amt * 10**d.inDec);
+  const q = await jupQuote(d.inMint, d.outMint, amountRaw);
+  if(q.err) return msg('quote failed: '+q.err,'red');
+
+  let safeTxt = '<span class="green">ok</span>';
+  if(side==='buy'){
+    const back = await jupQuote(d.outMint, d.inMint, q.quote.outAmount);
+    if(back.err){ $('quote').style.display='block'; $('q_safe').innerHTML='<span class="red">cannot sell — honeypot</span>';
+      return msg('⛔ blocked — this token cannot be sold','red'); }
+    const si=Number(back.quote.priceImpactPct||0);
+    if(si>0.35) safeTxt=`<span class="orange">high exit impact ${(si*100).toFixed(0)}%</span>`;
+  }
+
+  quote=q.quote;
+  const out=Number(quote.outAmount)/10**d.outDec;
+  const min=Number(quote.otherAmountThreshold)/10**d.outDec;
+  const impact=Number(quote.priceImpactPct||0)*100;
+  $('recv').value=fmt(out,6);
+  $('q_rate').textContent=`1 ${side==='buy'?'SOL':token.symbol} ≈ ${fmt(out/amt,6)} ${d.outSym}`;
+  $('q_impact').innerHTML=`<span class="${impact>5?'red':impact>1.5?'orange':'green'}">${impact.toFixed(2)}%</span>`;
+  $('q_min').textContent=`${fmt(min,6)} ${d.outSym}`;
+  $('q_safe').innerHTML=safeTxt;
+  $('q_route').textContent=quote.routePlan.map(r=>r.swapInfo?.label||'?').join(' → ');
+  $('quote').style.display='block';
+  if(!solUsd) await getSolUsd();
+  if(side==='buy'){ $('payUsd').textContent = solUsd?`≈ $${fmt(amt*solUsd,2)}`:''; }
+  else { $('payUsd').textContent = token.priceUsd?`≈ $${fmt(amt*token.priceUsd,2)}`:''; }
+  refreshSwapBtn(); msg('quote ready','green');
+  startRefresh();
+}
+async function jupQuote(inMint,outMint,amountRaw){
+  try{
+    const r=await fetch(`${JUP}/swap/v1/quote?inputMint=${inMint}&outputMint=${outMint}&amount=${amountRaw}&slippageBps=${Math.min(slippageBps,MAX_SLIPPAGE_BPS)}`);
+    const d=await r.json();
+    if(d.error) return {err:d.error};
+    if(!d.routePlan?.length) return {err:'no route'};
+    return {quote:d};
+  }catch(e){ return {err:String(e)}; }
+}
+
+function startRefresh(){ countdown=QUOTE_TTL; refreshTimer=setInterval(()=>{ countdown--;
+  $('refreshNote').textContent=`refreshing in ${countdown}s`;
+  if(countdown<=0){ stopRefresh(); getQuote(); } },1000); }
+function stopRefresh(){ if(refreshTimer){ clearInterval(refreshTimer); refreshTimer=null; } $('refreshNote').textContent=''; }
+
+function refreshSwapBtn(){
+  $('swapBtn').disabled = !(wallet && quote);
+  $('swapBtn').textContent = !wallet ? '[ connect wallet ]' : (quote ? (side==='buy'?'[ buy ]':'[ sell ]') : '[ get a quote ]');
+}
+
+$('swapBtn').onclick = async () => {
+  if(!wallet||!quote) return;
+  stopRefresh(); $('swapBtn').disabled=true;
+  try{
+    msg('building transaction…','dim');
+    const r=await fetch(`${JUP}/swap/v1/swap`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({quoteResponse:quote,userPublicKey:wallet.publicKey.toString(),
+        wrapAndUnwrapSol:true,dynamicComputeUnitLimit:true,prioritizationFeeLamports:'auto'})});
+    const {swapTransaction,error}=await r.json();
+    if(error||!swapTransaction) throw new Error(error||'no transaction');
+    const tx=VersionedTransaction.deserialize(Uint8Array.from(atob(swapTransaction),c=>c.charCodeAt(0)));
+    msg('approve in your wallet…','cy');
+    const {signature}=await wallet.signAndSendTransaction(tx);
+    msg('confirming…','cy');
+    const bh=await connection.getLatestBlockhash();
+    await connection.confirmTransaction({signature,...bh},'confirmed');
+    msg(`✅ done — <a href="https://solscan.io/tx/${signature}" target="_blank">view ↗</a>`,'green');
+    $('amount').value=''; $('recv').value=''; quote=null; $('quote').style.display='none';
+    refreshBalances(); refreshSwapBtn();
+  }catch(e){ msg('swap failed: '+(e.message||e),'red'); $('swapBtn').disabled=false; }
+};
+
+function applyGate(){
+  const ok=isLoggedIn();
+  $('swapBody').style.display=ok?'':'none';
+  $('connect').style.display=ok?'':'none';
+  $('locked').style.display=ok?'none':'';
+}
+applyGate();
+window.addEventListener('storage',e=>{ if(e.key&&e.key.includes(SB_PROJECT_REF)) applyGate(); });
+window.addEventListener('load',()=>{ const p=provider();
+  if(p?.isConnected&&p.publicKey){ wallet=p; const pk=p.publicKey.toString();
+    $('connect').textContent=pk.slice(0,4)+'…'+pk.slice(-4); refreshSwapBtn(); refreshBalances(); }
+  getSolUsd(); renderTokens();
+});
+</script>
+</body>
+</html>
