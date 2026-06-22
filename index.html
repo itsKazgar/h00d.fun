@@ -3,106 +3,143 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>h00d.fun</title>
+  <title>h00d.fun — launch, swap & floor-locked trading on Solana</title>
+  <meta name="description" content="h00d.fun: mint your own ‘…hood’ coin, swap any Solana token, and trade on a floor-locked market where the price floor only ever goes up. Non-custodial, on-chain, built on Solana." />
+  <link rel="canonical" href="https://h00d.fun/" />
+  <meta name="theme-color" content="#181a24" />
+  <!-- social / link previews -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://h00d.fun/" />
+  <meta property="og:title" content="h00d.fun — launch, swap & floor-locked trading on Solana" />
+  <meta property="og:description" content="Mint a ‘…hood’ coin, swap any token, and trade on a market where the floor only goes up. Non-custodial, on-chain." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="h00d.fun — Solana launchpad & floor-locked market" />
+  <meta name="twitter:description" content="Mint, swap, and trade on a floor-locked Solana market. Non-custodial and on-chain." />
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+  <!-- pinned to an exact release (was the floating gh-default-branch ref). Add an
+       SRI integrity= hash before mainnet — see scripts/compute-sri.sh -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0d0d0d; min-height: 100vh; min-height: 100dvh; font-family: 'VT323', monospace; color: #33ff33; }
+    body { background: #181a24; min-height: 100vh; min-height: 100dvh; font-family: 'VT323', monospace; color: #4fe6a0; }
     .page { display: none; min-height: 100vh; min-height: 100dvh; }
     .page.active { display: flex; }
     #p1 { align-items: center; justify-content: center; }
-    #enter-word { font-size: 28px; letter-spacing: 8px; color: #33ff33; cursor: pointer; }
-    #enter-word:hover { color: #fff; }
-    .cur-thin { display: inline-block; width: 2px; height: 18px; background: #33ff33; animation: bl 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
+    #enter-word { font-size: 28px; letter-spacing: 8px; color: #4fe6a0; cursor: pointer; }
+    #enter-word:hover { color: #eef1f5; }
+    .cur-thin { display: inline-block; width: 2px; height: 18px; background: #4fe6a0; animation: bl 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
     @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
     #p2 { flex-direction: column; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 18vh 2rem 2rem; }
-    .field-label { font-size: 13px; color: #444; letter-spacing: 3px; margin-bottom: 4px; }
-    .err { font-size: 14px; color: #ff4444; letter-spacing: 1px; min-height: 18px; }
-    .auth-toggle { font-size: 14px; color: #333; letter-spacing: 2px; }
-    .auth-toggle span { color: #33ff33; cursor: pointer; }
-    .auth-toggle span:hover { color: #fff; }
-    .wallet-hint { font-size: 13px; color: #333; letter-spacing: 1px; margin-top: 6px; }
+    .field-label { font-size: 13px; color: #8b93a4; letter-spacing: 3px; margin-bottom: 4px; }
+    .err { font-size: 14px; color: #ff7a85; letter-spacing: 1px; min-height: 18px; }
+    .auth-toggle { font-size: 14px; color: #6b7488; letter-spacing: 2px; }
+    .auth-toggle span { color: #4fe6a0; cursor: pointer; }
+    .auth-toggle span:hover { color: #eef1f5; }
+    .wallet-hint { font-size: 13px; color: #6b7488; letter-spacing: 1px; margin-top: 6px; }
     #p3 { flex-direction: column; padding: 2.5rem 3rem; gap: 1.5rem; }
     .topbar { display: flex; align-items: center; justify-content: space-between; }
-    .topbar-user { font-size: 16px; color: #33ff33; letter-spacing: 2px; }
+    .topbar-user { font-size: 16px; color: #4fe6a0; letter-spacing: 2px; }
     .topbar-right { display: flex; align-items: center; gap: 16px; }
-    .logout-btn, .nav-btn { background: none; border: none; font-family: 'VT323', monospace; font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; }
-    .logout-btn:hover { color: #ff4444; }
-    .nav-btn:hover { color: #33ff33; }
-    .feed-wrap { border-top: 1px solid #1a1a1a; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
-    .p-meta { font-size: 14px; color: #333; display: flex; align-items: center; gap: 8px; }
-    .p-meta .who { color: #33ff33; cursor: pointer; }
-    .p-meta .who:hover { color: #fff; text-decoration: underline; }
-    .p-body { font-size: 20px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .logout-btn, .nav-btn { background: none; border: none; font-family: 'VT323', monospace; font-size: 14px; color: #6b7488; cursor: pointer; letter-spacing: 2px; }
+    .logout-btn:hover { color: #ff7a85; }
+    .nav-btn:hover { color: #4fe6a0; }
+    .feed-wrap { border-top: 1px solid #2d3242; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .p-meta { font-size: 14px; color: #6b7488; display: flex; align-items: center; gap: 8px; }
+    .p-meta .who { color: #4fe6a0; cursor: pointer; }
+    .p-meta .who:hover { color: #eef1f5; text-decoration: underline; }
+    .p-body { font-size: 20px; color: #aab2c0; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
     .post-row { cursor: pointer; }
-    .post-row:hover .p-body { color: #fff; }
-    .reply-count { font-size: 13px; color: #2a7a2a; letter-spacing: 1px; margin-top: 4px; }
-    .loading { font-size: 16px; color: #333; letter-spacing: 2px; }
-    .back-link { font-size: 14px; color: #333; cursor: pointer; letter-spacing: 2px; margin-bottom: 0.5rem; }
-    .back-link:hover { color: #33ff33; }
-    .reply { margin-left: 1.5rem; border-left: 1px solid #1a1a1a; padding-left: 1rem; }
+    .post-row:hover .p-body { color: #eef1f5; }
+    .reply-count { font-size: 13px; color: #38c98a; letter-spacing: 1px; margin-top: 4px; }
+    .loading { font-size: 16px; color: #6b7488; letter-spacing: 2px; }
+    .back-link { font-size: 14px; color: #6b7488; cursor: pointer; letter-spacing: 2px; margin-bottom: 0.5rem; }
+    .back-link:hover { color: #4fe6a0; }
+    .reply { margin-left: 1.5rem; border-left: 1px solid #2d3242; padding-left: 1rem; }
     .bag-btn { background: none; border: none; cursor: pointer; padding: 0; opacity: 0.7; transition: opacity 0.15s, transform 0.15s; display: inline-flex; align-items: center; vertical-align: middle; }
     .bag-btn:hover { opacity: 1; transform: scale(1.15); }
     #p4, #p5, #p6 { flex-direction: column; padding: 2.5rem 3rem; gap: 1.5rem; }
-    .prof-head { display: flex; flex-direction: column; gap: 0.5rem; border-bottom: 1px solid #1a1a1a; padding-bottom: 1.25rem; }
-    .prof-name { font-size: 26px; color: #33ff33; letter-spacing: 2px; }
+    .prof-head { display: flex; flex-direction: column; gap: 0.5rem; border-bottom: 1px solid #2d3242; padding-bottom: 1.25rem; }
+    .prof-name { font-size: 26px; color: #4fe6a0; letter-spacing: 2px; }
     .prof-actions { display: flex; align-items: center; gap: 18px; margin-top: 6px; flex-wrap: wrap; }
-    .prof-action { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid #1e3a1e; font-family: 'VT323', monospace; font-size: 15px; color: #2a7a2a; cursor: pointer; letter-spacing: 1px; padding: 4px 12px; }
-    .prof-action:hover { border-color: #33ff33; color: #33ff33; }
-    .wallet-pay { cursor: pointer; font-size: 14px; letter-spacing: 1px; color: #444; word-break: break-all; padding: 4px 0; transition: color 0.15s; }
-    .wallet-pay:hover { color: #33ff33; }
-    .prof-nowallet { font-size: 13px; color: #333; letter-spacing: 1px; word-break: break-all; }
-    .dm-wrap { display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px solid #1a1a1a; padding-top: 1.25rem; flex: 1; overflow-y: auto; }
+    .prof-action { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid #2a6b4c; font-family: 'VT323', monospace; font-size: 15px; color: #38c98a; cursor: pointer; letter-spacing: 1px; padding: 4px 12px; }
+    .prof-action:hover { border-color: #4fe6a0; color: #4fe6a0; }
+    .wallet-pay { cursor: pointer; font-size: 14px; letter-spacing: 1px; color: #8b93a4; word-break: break-all; padding: 4px 0; transition: color 0.15s; }
+    .wallet-pay:hover { color: #4fe6a0; }
+    .prof-nowallet { font-size: 13px; color: #6b7488; letter-spacing: 1px; word-break: break-all; }
+    .dm-wrap { display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px solid #2d3242; padding-top: 1.25rem; flex: 1; overflow-y: auto; }
     .dm-line { font-size: 18px; line-height: 1.4; word-break: break-word; }
-    .dm-line .dm-from { color: #33ff33; }
-    .dm-line.them .dm-from { color: #00bcd4; }
-    .dm-line .dm-text { color: #ccc; }
-    .dm-compose { display: flex; align-items: center; gap: 12px; border-top: 1px solid #1a1a1a; padding-top: 1rem; }
+    .dm-line .dm-from { color: #4fe6a0; }
+    .dm-line.them .dm-from { color: #5bd6e6; }
+    .dm-line .dm-text { color: #aab2c0; }
+    .dm-compose { display: flex; align-items: center; gap: 12px; border-top: 1px solid #2d3242; padding-top: 1rem; }
     #sol-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; z-index: 100; }
     #sol-modal.open { display: flex; }
     #set-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; z-index: 100; }
     #set-modal.open { display: flex; }
-    .sol-box { background: #0d0d0d; border: 1px solid #1e3a1e; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 280px; max-width: 360px; }
-    .sol-box-title { font-size: 18px; color: #33ff33; letter-spacing: 3px; }
-    .sol-to { font-size: 14px; color: #444; letter-spacing: 1px; }
-    .sol-to span { color: #33ff33; }
-    .sol-addr { font-size: 11px; color: #222; letter-spacing: 1px; word-break: break-all; margin-top: -6px; }
-    .sol-warn { font-size: 12px; color: #888; letter-spacing: 0.5px; line-height: 1.4; border: 1px solid #1e1e1e; padding: 8px 10px; }
-    .sol-warn b { color: #33ff33; }
-    .sol-method { text-align: left; border: 1px solid #1e3a1e !important; padding: 10px 14px !important; font-size: 16px !important; letter-spacing: 1px !important; width: 100%; }
-    .sol-method:hover { border-color: #33ff33 !important; background: rgba(51,255,51,0.04); }
+    .sol-box { background: #181a24; border: 1px solid #2a6b4c; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 280px; max-width: 360px; }
+    .sol-box-title { font-size: 18px; color: #4fe6a0; letter-spacing: 3px; }
+    .sol-to { font-size: 14px; color: #8b93a4; letter-spacing: 1px; }
+    .sol-to span { color: #4fe6a0; }
+    .sol-addr { font-size: 11px; color: #3a4152; letter-spacing: 1px; word-break: break-all; margin-top: -6px; }
+    .sol-warn { font-size: 12px; color: #aab2c0; letter-spacing: 0.5px; line-height: 1.4; border: 1px solid #313748; padding: 8px 10px; }
+    .sol-warn b { color: #4fe6a0; }
+    .sol-method { text-align: left; border: 1px solid #2a6b4c !important; padding: 10px 14px !important; font-size: 16px !important; letter-spacing: 1px !important; width: 100%; }
+    .sol-method:hover { border-color: #4fe6a0 !important; background: rgba(79,230,160,0.04); }
     #sol-methods { display: flex; flex-direction: column; gap: 10px; }
-    .sol-qr-canvas { display: flex; align-items: center; justify-content: center; background: #fff; padding: 16px; align-self: center; }
+    .sol-qr-canvas { display: flex; align-items: center; justify-content: center; background: #eef1f5; padding: 16px; align-self: center; }
     .sol-qr-canvas canvas, .sol-qr-canvas img { display: block; }
-    .sol-hint { font-size: 13px; color: #555; letter-spacing: 1px; text-align: center; }
-    .sol-err { font-size: 13px; color: #ff4444; min-height: 16px; }
-    .sol-success { font-size: 13px; color: #33ff33; min-height: 16px; }
-    .sol-close { font-size: 13px; color: #333; cursor: pointer; letter-spacing: 2px; }
-    .sol-close:hover { color: #ff4444; }
+    .sol-hint { font-size: 13px; color: #6b7488; letter-spacing: 1px; text-align: center; }
+    .sol-err { font-size: 13px; color: #ff7a85; min-height: 16px; }
+    .sol-success { font-size: 13px; color: #4fe6a0; min-height: 16px; }
+    .sol-close { font-size: 13px; color: #6b7488; cursor: pointer; letter-spacing: 2px; }
+    .sol-close:hover { color: #ff7a85; }
     input[type=text], input[type=password], input[type=number], textarea {
       -webkit-appearance: none; appearance: none;
-      background: #0d0d0d !important; border: none !important; outline: none !important;
+      background: #181a24 !important; border: none !important; outline: none !important;
       box-shadow: none !important; border-radius: 0; padding: 0; margin: 0;
-      font-family: 'VT323', monospace !important; caret-color: #33ff33;
-      -webkit-text-fill-color: #ffffff !important; color: #ffffff !important;
+      font-family: 'VT323', monospace !important; caret-color: #4fe6a0;
+      -webkit-text-fill-color: #eef1f5 !important; color: #eef1f5 !important;
     }
-    input[type=text], input[type=password] { font-size: 18px !important; letter-spacing: 2px; width: 260px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; }
-    input[type=number] { font-size: 18px !important; letter-spacing: 2px; width: 160px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; }
-    input::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
+    input[type=text], input[type=password] { font-size: 18px !important; letter-spacing: 2px; width: 260px; border-bottom: 1px solid #313748 !important; padding-bottom: 4px !important; }
+    input[type=number] { font-size: 18px !important; letter-spacing: 2px; width: 160px; border-bottom: 1px solid #313748 !important; padding-bottom: 4px !important; }
+    input::placeholder { color: #5f6675 !important; -webkit-text-fill-color: #5f6675 !important; }
     textarea.msgbox { font-size: 20px !important; resize: none; width: 100%; line-height: 1.5; letter-spacing: 1px; }
-    textarea.msgbox::placeholder { color: #2a2a2a !important; -webkit-text-fill-color: #2a2a2a !important; }
-    .dm-input { flex: 1; font-size: 18px !important; letter-spacing: 1px; border-bottom: 1px solid #1e1e1e !important; padding-bottom: 4px !important; width: auto; }
-    button.action { background: none; border: none; font-family: 'VT323', monospace; font-size: 18px; color: #33ff33; cursor: pointer; letter-spacing: 3px; }
-    button.action:hover { color: #fff; }
+    textarea.msgbox::placeholder { color: #5f6675 !important; -webkit-text-fill-color: #5f6675 !important; }
+    .dm-input { flex: 1; font-size: 18px !important; letter-spacing: 1px; border-bottom: 1px solid #313748 !important; padding-bottom: 4px !important; width: auto; }
+    button.action { background: none; border: none; font-family: 'VT323', monospace; font-size: 18px; color: #4fe6a0; cursor: pointer; letter-spacing: 3px; }
+    button.action:hover { color: #eef1f5; }
     .menu-wrap{position:relative}
-  .menu-drop{display:none;position:absolute;right:0;top:26px;background:#0d0d0d;border:1px solid #1e3a1e;flex-direction:column;min-width:130px;z-index:200}
+  .menu-drop{display:none;position:absolute;right:0;top:26px;background:#181a24;border:1px solid #2a6b4c;flex-direction:column;min-width:150px;z-index:200}
   .menu-drop.open{display:flex}
-  .menu-item{background:none;border:none;font-family:'VT323',monospace;font-size:16px;color:#33ff33;text-align:left;padding:10px 16px;cursor:pointer;letter-spacing:2px}
-  .menu-item:hover{background:rgba(51,255,51,0.04);color:#fff}
-  .menu-item + .menu-item{border-top:1px solid #1a1a1a}
+  .menu-item{background:none;border:none;font-family:'VT323',monospace;font-size:16px;color:#4fe6a0;text-align:left;padding:10px 16px;cursor:pointer;letter-spacing:2px}
+  .menu-item:hover{background:rgba(79,230,160,0.04);color:#eef1f5}
+  .menu-item + .menu-item{border-top:1px solid #2d3242}
+
+  /* post-login hub (the option screen) */
+  #p0{align-items:center;justify-content:center;padding:2rem 1.25rem}
+  .hub{display:flex;flex-direction:column;align-items:center;gap:1.4rem;width:100%;max-width:360px}
+  .hub-grid{display:flex;flex-direction:column;gap:.55rem;width:100%}
+  .tile{position:relative;display:flex;align-items:center;gap:12px;
+        border:1px solid #2d3242;border-left:2px solid #2d3242;background:#20232e;
+        padding:13px 16px 13px 22px;cursor:pointer;text-decoration:none;
+        transition:border-color .15s,background .15s,transform .15s}
+  .tile::before{content:"\203a";position:absolute;left:9px;top:50%;transform:translateY(-50%);
+        color:#4fe6a0;font-size:18px;opacity:0;transition:opacity .15s}
+  .tile:hover{border-color:#3a8d63;border-left-color:#4fe6a0;background:rgba(79,230,160,0.06);transform:translateX(4px)}
+  .tile:hover::before{opacity:1}
+  .tile .tl{display:flex;flex-direction:column;min-width:0;gap:2px}
+  .tile .nm{color:#4fe6a0;font-size:19px;letter-spacing:3px;line-height:1.1}
+  .tile:hover .nm{color:#eef1f5}
+  .tile .ds{color:#6b7488;font-size:12px;letter-spacing:1px}
+  .tile .arr{margin-left:auto;color:#3f4759;font-size:18px;transition:transform .15s,color .15s}
+  .tile:hover .arr{color:#4fe6a0;transform:translateX(4px)}
+  .hub-foot{display:flex;align-items:center;gap:12px;font-size:13px;color:#8b93a4;letter-spacing:2px;margin-top:.5rem}
+  .hub-foot .u{color:#38c98a;cursor:pointer}.hub-foot .u:hover{color:#4fe6a0}
+  .hub-foot .lo{cursor:pointer}.hub-foot .lo:hover{color:#ff7a85}
+  .hub-foot .sep{color:#3a4152}
 </style>
+  <link rel="stylesheet" href="cute.css">
 </head>
 <body>
 
@@ -120,13 +157,44 @@
     <input type="password" id="auth-pass" placeholder="••••••••" maxlength="64" />
   </div>
   <div id="wallet-field" style="display:none">
-    <div class="field-label">SOLANA WALLET <span style="color:#333;font-size:11px;letter-spacing:1px;">optional</span></div>
+    <div class="field-label">SOLANA WALLET <span style="color:#6b7488;font-size:11px;letter-spacing:1px;">optional</span></div>
     <input type="text" id="auth-wallet" placeholder="your public key" maxlength="44" autocomplete="off" spellcheck="false" />
     <div class="wallet-hint">so others can send you SOL</div>
   </div>
   <div class="err" id="auth-err"></div>
   <button class="action" id="auth-btn" onclick="submitAuth()">[ enter ]</button>
   <div class="auth-toggle" id="auth-toggle">no account? <span onclick="toggleMode()">register</span></div>
+</div>
+
+<!-- HUB (option screen shown right after login) -->
+<div class="page" id="p0">
+  <div class="hub">
+    <div class="hub-grid">
+      <a class="tile" href="/swap.html">
+        <span class="tl"><span class="nm">swap</span><span class="ds">trade any solana coin</span></span><span class="arr">→</span>
+      </a>
+      <a class="tile" href="/launch.html">
+        <span class="tl"><span class="nm">mint</span><span class="ds">launch your own coin</span></span><span class="arr">→</span>
+      </a>
+      <a class="tile" href="/market.html">
+        <span class="tl"><span class="nm">market</span><span class="ds">floor-locked p2p trading</span></span><span class="arr">→</span>
+      </a>
+      <a class="tile" href="/curve.html">
+        <span class="tl"><span class="nm">curve</span><span class="ds">bonding-curve launches</span></span><span class="arr">→</span>
+      </a>
+      <a class="tile" href="/discover.html">
+        <span class="tl"><span class="nm">discover</span><span class="ds">coins launched here</span></span><span class="arr">→</span>
+      </a>
+      <a class="tile" onclick="showFeed()">
+        <span class="tl"><span class="nm">feed</span><span class="ds">the community forum</span></span><span class="arr">→</span>
+      </a>
+    </div>
+    <div class="hub-foot">
+      <span class="u" id="hub-user" onclick="openProfile(currentUsername)"></span>
+      <span class="sep">·</span>
+      <span class="lo" onclick="logout()">logout</span>
+    </div>
+  </div>
 </div>
 
 <!-- MAIN FEED -->
@@ -137,7 +205,12 @@
     <div class="menu-wrap">
       <button class="nav-btn" id="menu-btn" onclick="toggleMenu(event)">[ menu ]</button>
       <div class="menu-drop" id="menu-drop">
+        <button class="menu-item" onclick="showHub()">home</button>
         <button class="menu-item" onclick="location.href='/swap.html'">swap</button>
+        <button class="menu-item" onclick="location.href='/launch.html'">mint</button>
+        <button class="menu-item" onclick="location.href='/market.html'">market</button>
+        <button class="menu-item" onclick="location.href='/curve.html'">curve</button>
+        <button class="menu-item" onclick="location.href='/discover.html'">discover</button>
         <button class="menu-item" onclick="logout()">logout</button>
       </div>
     </div>
@@ -227,7 +300,7 @@
       <div class="field-label">SOLANA WALLET</div>
       <input type="text" id="set-wallet" placeholder="your public key" maxlength="44" autocomplete="off" spellcheck="false" />
     </div>
-    <div style="font-size:12px;color:#888;letter-spacing:0.5px;line-height:1.4;">this is the address others send SOL to. leave blank to remove it.</div>
+    <div style="font-size:12px;color:#aab2c0;letter-spacing:0.5px;line-height:1.4;">this is the address others send SOL to. leave blank to remove it.</div>
     <div class="sol-err" id="set-err"></div>
     <div class="sol-success" id="set-success"></div>
     <button class="action" onclick="saveWallet()">[ save ]</button>
@@ -260,7 +333,7 @@
     if (session) {
       currentUser = session.user;
       const { data: profile } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
-      if (profile) { currentUsername = profile.username; showFeed(); }
+      if (profile) { currentUsername = profile.username; showHub(); }
     }
   }
   init();
@@ -301,7 +374,7 @@
   }
 
   function showAuth() {
-    if (currentUser) { showFeed(); return; }
+    if (currentUser) { showHub(); return; }
     show('p2');
     setTimeout(() => document.getElementById('auth-user').focus(), 50);
   }
@@ -340,7 +413,7 @@
 
       currentUser = data.user;
       currentUsername = username;
-      showFeed();
+      showHub();
     } else {
       const { data: profile } = await sb.from('profiles').select('username').eq('username', username).single();
       if (!profile) { err.textContent = 'wrong username or password'; return; }
@@ -350,8 +423,14 @@
 
       currentUser = data.user;
       currentUsername = username;
-      showFeed();
+      showHub();
     }
+  }
+
+  // option screen shown right after login
+  function showHub() {
+    document.getElementById('hub-user').textContent = '~ ' + currentUsername;
+    show('p0');
   }
 
   function showFeed() {
@@ -390,11 +469,11 @@
       row.innerHTML = `
         <div class="p-meta">
           <span class="who">${esc(p.username)}</span>
-          <span style="color:#2a2a2a">·</span>
+          <span style="color:#5f6675">·</span>
           <span>${timeAgo(p.created_at)}</span>
         </div>
         <div class="p-body">${esc(p.body)}</div>
-        ${c ? `<div class="reply-count">${c} ${c === 1 ? 'reply' : 'replies'} →</div>` : '<div class="reply-count" style="color:#222">reply →</div>'}`;
+        ${c ? `<div class="reply-count">${c} ${c === 1 ? 'reply' : 'replies'} →</div>` : '<div class="reply-count" style="color:#3a4152">reply →</div>'}`;
       row.querySelector('.who').addEventListener('click', (e) => { e.stopPropagation(); openProfile(p.username); });
       row.addEventListener('click', () => openThread(p.id));
       feed.appendChild(row);
@@ -423,7 +502,7 @@
     rootEl.innerHTML = `
       <div class="p-meta">
         <span class="who" id="thread-root-user">${esc(root.username)}</span>
-        <span style="color:#2a2a2a">·</span>
+        <span style="color:#5f6675">·</span>
         <span>${timeAgo(root.created_at)}</span>
       </div>
       <div class="p-body">${esc(root.body)}</div>`;
@@ -442,7 +521,7 @@
       el.innerHTML = `
         <div class="p-meta">
           <span class="who">${esc(r.username)}</span>
-          <span style="color:#2a2a2a">·</span>
+          <span style="color:#5f6675">·</span>
           <span>${timeAgo(r.created_at)}</span>
         </div>
         <div class="p-body">${esc(r.body)}</div>`;
@@ -513,7 +592,7 @@
         <div class="wallet-hint" id="wallet-edit-msg">paste your wallet address, or leave blank to remove</div>
         <div style="display:flex;gap:14px">
           <button class="prof-action" id="wallet-save-btn">save</button>
-          <button class="prof-action" id="wallet-cancel-btn" style="border-color:#1e1e1e;color:#555">cancel</button>
+          <button class="prof-action" id="wallet-cancel-btn" style="border-color:#313748;color:#6b7488">cancel</button>
         </div>`;
       wrap.appendChild(editRow);
       actions.appendChild(wrap);
@@ -546,7 +625,7 @@
       const row = document.createElement('div');
       row.className = 'post-row';
       row.innerHTML = `
-        <div class="p-meta"><span style="color:#333">${timeAgo(p.created_at)}</span></div>
+        <div class="p-meta"><span style="color:#6b7488">${timeAgo(p.created_at)}</span></div>
         <div class="p-body">${esc(p.body)}</div>`;
       row.addEventListener('click', () => openThread(p.id));
       pc.appendChild(row);
@@ -560,17 +639,17 @@
     const val = inp.value.trim();
     // allow empty (removes wallet) or a valid-looking solana address
     if (val && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val)) {
-      msg.style.color = '#ff4444';
+      msg.style.color = '#ff7a85';
       msg.textContent = 'that does not look like a valid wallet address';
       return;
     }
-    msg.style.color = '#333';
+    msg.style.color = '#6b7488';
     msg.textContent = 'saving...';
     const { error } = await sb.from('profiles')
       .update({ wallet: val || null })
       .eq('id', currentUser.id);
     if (error) {
-      msg.style.color = '#ff4444';
+      msg.style.color = '#ff7a85';
       msg.textContent = 'error saving — try again';
       return;
     }
@@ -720,10 +799,10 @@
     const status = document.getElementById('sol-copy-status');
     try {
       await navigator.clipboard.writeText(_solTo.wallet);
-      status.style.color = '#33ff33';
+      status.style.color = '#4fe6a0';
       status.textContent = '✓ address copied';
     } catch (e) {
-      status.style.color = '#ff4444';
+      status.style.color = '#ff7a85';
       status.textContent = 'could not copy — long-press the address above to copy';
     }
   }
@@ -745,13 +824,16 @@
       } catch (e1) {
         web3 = await import('https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/+esm');
       }
-      const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } = web3;
+      const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, ComputeBudgetProgram } = web3;
       const RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=09fb7d5a-50cb-4b0a-8f9d-db40d1986eb4';
       const connection = new Connection(RPC_URL, 'confirmed');
       const fromPubkey = provider.publicKey;
       const toPubkey   = new PublicKey(_solTo.wallet);
       const lamports   = Math.round(amount * LAMPORTS_PER_SOL);
-      const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
+      const tx = new Transaction().add(
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100000 }), // priority fee so the transfer lands on busy mainnet
+        SystemProgram.transfer({ fromPubkey, toPubkey, lamports })
+      );
       const { blockhash } = await connection.getLatestBlockhash();
       tx.recentBlockhash = blockhash;
       tx.feePayer = fromPubkey;

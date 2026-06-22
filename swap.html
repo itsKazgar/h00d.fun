@@ -1,49 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="preload">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>swap</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=block" rel="stylesheet">
 <!-- Clean non-custodial Jupiter swap. Real Solana data, styled to match h00d.fun. -->
 <style>
-  /* Typography + colors lifted directly from h00d.fun (index.html) */
-  :root{ --bg:#0d0d0d; --green:#33ff33; --txt:#fff; --txt2:#ccc;
-         --g2:#222; --g3:#333; --g4:#444; --g5:#555;
-         --line:#1a1a1a; --line2:#1e1e1e; --box:#1e3a1e;
-         --red:#ff4444; --orange:#e0a040; --cy:#00bcd4; --mono:'VT323',monospace; }
+  /* hide until the VT323 font is ready — kills the unstyled flash */
+  html.preload body{visibility:hidden}
+
+  /* Typography + colors lifted straight from h00d.fun — keep it identical */
+  :root{ --bg:#181a24; --green:#4fe6a0; --txt:#eef1f5; --txt2:#aab2c0;
+         --g2:#3a4152; --g3:#6b7488; --g4:#8b93a4; --g5:#6b7488;
+         --line:#2d3242; --line2:#313748; --box:#2a6b4c;
+         --red:#ff7a85; --orange:#e0a040; --cy:#5bd6e6; --mono:'VT323',monospace; }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--green);font-family:var(--mono);font-size:20px;line-height:1.4;
        min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem}
   .wrap{width:100%;max-width:360px;position:relative}
+  .back{display:inline-block;color:var(--g4);font-size:15px;letter-spacing:2px;text-decoration:none;margin-bottom:1rem}
+  .back:hover{color:var(--green)}
 
   .bar{display:flex;justify-content:space-between;align-items:baseline;
        border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:1.4rem}
   .title{color:var(--green);font-size:18px;letter-spacing:3px}
-  .lnk{background:none;border:none;font-family:var(--mono);color:var(--g3);font-size:14px;cursor:pointer;letter-spacing:2px}
-  .lnk:hover{color:var(--green)}
+  .lnk{background:none;border:none;font-family:var(--mono);color:var(--green);font-size:14px;cursor:pointer;letter-spacing:2px}
+  .lnk:hover{color:#eef1f5}
 
   .field{margin-bottom:1.1rem}
   .label{font-size:13px;color:var(--g4);letter-spacing:3px;margin-bottom:7px}
-  .line{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line2);padding-bottom:5px}
+  .line{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line2);padding-bottom:6px}
   .amt{flex:1;min-width:0;background:none;border:none;outline:none;font-family:var(--mono);font-size:28px;
-       color:var(--txt);caret-color:var(--green);-webkit-text-fill-color:#fff}
-  .amt::placeholder{color:#2a2a2a;-webkit-text-fill-color:#2a2a2a}
+       color:var(--txt);caret-color:var(--green);-webkit-text-fill-color:#eef1f5}
+  .amt::placeholder{color:#5f6675;-webkit-text-fill-color:#5f6675}
   .amt[readonly]{color:var(--txt2);-webkit-text-fill-color:var(--txt2)}
   .tok{background:none;border:none;font-family:var(--mono);color:var(--txt);font-size:20px;cursor:pointer;
-       display:flex;align-items:center;gap:6px;white-space:nowrap;letter-spacing:1px}
+       display:flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:1px}
   .tok:hover{color:var(--green)}
-  .tok img{width:20px;height:20px;border-radius:50%}
-  .tok .car{color:var(--g4);font-size:14px}
-  .sub{display:flex;justify-content:space-between;font-size:14px;color:var(--g4);letter-spacing:1px;margin-top:6px}
+  .tok img{width:22px;height:22px;border-radius:50%;background:#20232e;object-fit:cover}
+  .tok .car{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;
+            border-top:5px solid var(--g4);margin-left:1px}
+  .tok:hover .car{border-top-color:var(--green)}
+  .sub{display:flex;justify-content:space-between;font-size:14px;color:var(--g4);letter-spacing:1px;margin-top:7px}
   .sub .r{display:flex;gap:12px;align-items:center}
   .mini{background:none;border:none;font-family:var(--mono);color:var(--green);font-size:14px;cursor:pointer;letter-spacing:1px}
-  .mini:hover{color:#fff}
+  .mini:hover{color:#eef1f5}
 
-  .arrow{display:block;margin:0 auto 0.6rem;background:none;border:none;color:var(--g3);font-size:18px;cursor:pointer}
-  .arrow:hover{color:var(--green)}
+  .flip{display:flex;justify-content:center;margin:2px 0 10px}
+  .arrow{display:flex;align-items:center;justify-content:center;width:30px;height:30px;background:none;
+         border:1px solid var(--line2);border-radius:50%;color:var(--g5);cursor:pointer}
+  .arrow:hover{color:var(--green);border-color:var(--box)}
+  .arrow svg{width:15px;height:15px}
 
+  .safety{display:none;font-size:13px;letter-spacing:1px;margin:-.3rem 0 .4rem;color:var(--g4)}
   .quote{display:none;font-size:15px;letter-spacing:1px;margin:1.3rem 0;border-top:1px solid var(--line);padding-top:1rem}
   .quote div{display:flex;justify-content:space-between;margin:4px 0}
   .quote div span:first-child{color:var(--g4)}
@@ -56,8 +68,8 @@
               color:var(--txt);font-size:15px;outline:none;text-align:center;caret-color:var(--green)}
 
   .cta{width:100%;background:none;border:1px solid var(--box);font-family:var(--mono);color:var(--green);
-       font-size:20px;letter-spacing:3px;padding:11px;cursor:pointer;margin-top:.2rem}
-  .cta:hover:not(:disabled){border-color:var(--green);background:rgba(51,255,51,.04);color:#fff}
+       font-size:20px;letter-spacing:3px;padding:12px;cursor:pointer;margin-top:.2rem}
+  .cta:hover:not(:disabled){border-color:var(--green);background:rgba(79,230,160,.05);color:#eef1f5}
   .cta:disabled{color:var(--g3);cursor:not-allowed}
   .msg{margin-top:14px;font-size:15px;min-height:18px;letter-spacing:1px;color:var(--g4)}
   .note{color:var(--g3);font-size:13px;text-align:center;margin-top:6px;letter-spacing:1px}
@@ -65,28 +77,50 @@
   .cy{color:var(--cy)!important} .dim{color:var(--g4)!important}
   a{color:var(--green)}
 
+  /* hide ugly native number spinners */
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+  /* token avatar: real logo over a letter-circle fallback (no broken/placeholder icons) */
+  .ava{position:relative;border-radius:50%;display:inline-flex;flex-shrink:0;overflow:hidden;vertical-align:middle}
+  .ava .ava-l{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+              background:var(--c);color:#181a24;font-family:var(--mono)}
+  .ava img{position:absolute!important;inset:0;width:100%!important;height:100%!important;object-fit:cover;border-radius:0}
+
   .locked{display:none;color:var(--txt2);font-size:18px;text-align:center;padding:3rem 0;letter-spacing:2px}
   .locked a{color:var(--green);cursor:pointer}
 
   /* token search */
   .search{display:none;position:absolute;inset:0;background:var(--bg);z-index:5;flex-direction:column}
-  .searchbar{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line2);padding-bottom:6px}
+  .searchbar{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line2);padding-bottom:7px}
   .searchbar input{flex:1;min-width:0;background:none;border:none;outline:none;font-family:var(--mono);
                    font-size:20px;color:var(--txt);caret-color:var(--green)}
-  .searchbar input::placeholder{color:#2a2a2a}
+  .searchbar input::placeholder{color:#5f6675}
   .results{margin-top:8px;overflow:auto;max-height:60vh}
-  .res{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
-  .res:hover{opacity:.65}
-  .res img{width:26px;height:26px;border-radius:50%}
-  .res .sym{color:var(--txt);font-size:18px;letter-spacing:1px}
+  .res{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .res:hover{opacity:.6}
+  .res img{width:30px;height:30px;border-radius:50%;background:#20232e;object-fit:cover;flex-shrink:0}
+  .res .sym{color:var(--txt);font-size:18px;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+  .res .ok{color:var(--green);font-size:13px}
   .res .nm{color:var(--g4);font-size:13px}
   .res .px{margin-left:auto;text-align:right}
   .res .px .p{color:var(--green);font-size:15px}
   .res .px .lq{color:var(--g4);font-size:12px}
 </style>
+<script>
+  /* reveal once VT323 is loaded (or after a short fallback) — no FOUC */
+  (function(){
+    var show=function(){document.documentElement.classList.remove('preload');};
+    if(document.fonts&&document.fonts.ready){document.fonts.ready.then(show);}
+    setTimeout(show,1200);
+  })();
+</script>
+  <link rel="stylesheet" href="cute.css">
 </head>
 <body>
 <div class="wrap">
+  <a class="back" href="/">‹ back</a>
   <div class="bar">
     <span class="title">swap</span>
     <button id="connect" class="lnk" style="display:none">[ connect ]</button>
@@ -104,16 +138,24 @@
       <div class="sub"><span id="payUsd"></span><span class="r"><span id="payBal"></span><button id="maxBtn" class="mini" style="display:none">max</button></span></div>
     </div>
 
-    <button id="flipBtn" class="arrow" title="flip">↓</button>
+    <div class="flip">
+      <button id="flipBtn" class="arrow" title="flip direction">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 4v16"/><path d="M4 17l3 3 3-3"/><path d="M17 20V4"/><path d="M20 7l-3-3-3 3"/>
+        </svg>
+      </button>
+    </div>
 
     <div class="field">
       <div class="label">you get</div>
       <div class="line">
         <input id="recv" class="amt" type="text" placeholder="0.0" readonly>
-        <button id="recTok" class="tok"><img id="recTokImg" style="display:none"><span id="recTokSym">select</span><span class="car">▾</span></button>
+        <button id="recTok" class="tok"><img id="recTokImg" style="display:none"><span id="recTokSym">select</span><span class="car"></span></button>
       </div>
       <div class="sub"><span id="recUsd"></span><span class="r"><span id="recBal"></span></span></div>
     </div>
+
+    <div id="safety" class="safety"></div>
 
     <div id="quote" class="quote">
       <div><span>rate</span><span id="q_rate">—</span></div>
@@ -146,10 +188,10 @@
 </div>
 
 <script type="module">
-import { Connection, VersionedTransaction } from 'https://esm.sh/@solana/web3.js@1.95.8';
+import { Connection, VersionedTransaction } from 'https://esm.sh/@solana/web3.js@1.98.0';
 
 // ── config ──────────────────────────────────────────────────────────────
-const RPC   = 'https://api.mainnet-beta.solana.com'; // ⚠ replace with a Helius/QuickNode URL for real traffic
+const RPC   = 'https://mainnet.helius-rpc.com/?api-key=09fb7d5a-50cb-4b0a-8f9d-db40d1986eb4'; // lock this key to h00d.fun in the Helius dashboard
 const JUP   = 'https://lite-api.jup.ag';
 const DEX   = 'https://api.dexscreener.com/latest/dex';
 const LOGO  = m => `https://dd.dexscreener.com/ds-data/tokens/solana/${m}.png`;
@@ -157,6 +199,17 @@ const SOL_MINT = 'So11111111111111111111111111111111111111112';
 const SOL_DEC  = 9;
 const MAX_SLIPPAGE_BPS = 5000;
 const QUOTE_TTL = 15;
+
+// ── referral fee (optional, earns on every swap) ─────────────────────────
+// Every trade here touches SOL (buy = SOL→token, sell = token→SOL), so a single
+// wrapped-SOL referral token account collects the fee in either direction — no
+// per-token setup. Leave FEE_ACCOUNT empty to disable (zero behaviour change).
+//   1. go to https://referral.jup.ag → create a referral account
+//   2. create a fee token account for mint So111…112 (wrapped SOL)
+//   3. paste that token-account address below
+const FEE_BPS     = 20;   // 0.20% — Jupiter caps platform fees; keep it modest
+const FEE_ACCOUNT = '';   // ← your wSOL referral token account (empty = off)
+const FEE_ON = () => FEE_ACCOUNT.length > 0 && FEE_BPS > 0;
 
 // ── login gate (Supabase session stored by the site, same-origin) ────────
 const REQUIRE_LOGIN  = true;
@@ -175,6 +228,27 @@ function isLoggedIn(){
 
 const connection = new Connection(RPC, 'confirmed');
 const $ = id => document.getElementById(id);
+
+// canonical majors — used to (a) drop impersonators with the same ticker but a
+// fake mint, and (b) show a real logo. Logos from the Solana token-list CDN.
+const TL = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet';
+const KNOWN = {
+  sol:  {sym:'SOL',  mint:SOL_MINT, name:'Solana',   logo:`${TL}/So11111111111111111111111111111111111111112/logo.png`},
+  usdc: {sym:'USDC', mint:'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', name:'USD Coin', logo:`${TL}/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png`},
+  usdt: {sym:'USDT', mint:'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', name:'USDT',     logo:`${TL}/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.png`},
+};
+function hue(s){ let h=0; for(const c of (s||'?')) h=(h*31+c.charCodeAt(0))%360; return h; }
+// escape user-controlled strings before they touch innerHTML. token names/symbols
+// and logo URLs come from DexScreener and are fully attacker-controlled (anyone can
+// mint a token named `<img onerror=…>`), so guard every sink against XSS.
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const safeImg = u => (typeof u==='string' && /^https:\/\//i.test(u)) ? u.replace(/"/g,'%22') : '';
+function avatar(sym, logo, size=30){
+  const c=`hsl(${hue(sym)},55%,52%)`, l=esc(((sym||'?')[0]||'?').toUpperCase());
+  const lg=safeImg(logo);
+  return `<span class="ava" style="width:${size}px;height:${size}px;font-size:${Math.round(size*0.5)}px;--c:${c}">`
+       + `<span class="ava-l">${l}</span>${lg?`<img src="${lg}" onerror="this.remove()">`:''}</span>`;
+}
 
 let wallet = null;
 let side = 'buy';
@@ -195,6 +269,35 @@ async function getDecimals(mint){
   if(mint in decCache) return decCache[mint];
   try{ const r = await rpc('getTokenSupply',[mint]); decCache[mint]=r.value.decimals; return r.value.decimals; }
   catch(e){ return 9; }
+}
+
+// ── free safety checks: on-chain authorities + RugCheck ──────────────────
+async function getMintInfo(mint){
+  try{
+    const r = await rpc('getAccountInfo',[mint,{encoding:'jsonParsed'}]);
+    const info = r?.value?.data?.parsed?.info || {};
+    return { mintAuth: info.mintAuthority || null, freezeAuth: info.freezeAuthority || null };
+  }catch(e){ return null; }
+}
+async function checkSafety(mint){
+  const el=$('safety'); if(!el) return;
+  el.style.display='block'; el.innerHTML='<span class="dim">checking safety…</span>';
+  const parts=[];
+  // 1) on-chain authorities — the most reliable, free rug signals
+  const mi=await getMintInfo(mint);
+  if(mi){
+    parts.push(mi.mintAuth  ? '<span class="orange">mint authority live</span>' : '<span class="green">mint&nbsp;✓</span>');
+    parts.push(mi.freezeAuth? '<span class="red">freeze authority live</span>'  : '<span class="green">freeze&nbsp;✓</span>');
+  }
+  // 2) RugCheck (best-effort; if CORS/network blocks it we just skip)
+  try{
+    const r=await fetch(`https://api.rugcheck.xyz/v1/tokens/${mint}/report/summary`);
+    if(r.ok){ const d=await r.json();
+      const danger=(d.risks||[]).filter(x=>x.level==='danger');
+      parts.push(danger.length ? `<span class="red">rugcheck: ${danger[0].name}</span>` : '<span class="green">rugcheck&nbsp;✓</span>');
+    }
+  }catch(e){}
+  if(token && token.mint===mint) el.innerHTML = parts.join('&nbsp;&nbsp;·&nbsp;&nbsp;');
 }
 async function getSolUsd(){
   try{ const r = await fetch(`${JUP}/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=${10**9}&slippageBps=50`);
@@ -240,41 +343,68 @@ $('searchClose').onclick = () => $('search').style.display='none';
 function openSearch(){ $('search').style.display='flex'; $('searchInput').value=''; $('results').innerHTML=''; $('searchInput').focus(); }
 
 let searchT=null;
-$('searchInput').oninput = e => { clearTimeout(searchT); searchT=setTimeout(()=>runSearch(e.target.value.trim()),280); };
+$('searchInput').oninput = e => { clearTimeout(searchT); searchT=setTimeout(()=>runSearch(e.target.value.trim()),260); };
+const ALIAS = {solana:'sol', wsol:'sol', 'wrapped sol':'sol'};
 async function runSearch(q){
   if(!q){ $('results').innerHTML=''; return; }
-  $('results').innerHTML='<div class="dim" style="padding:8px 0">searching…</div>';
+  $('results').innerHTML='<div class="dim" style="padding:10px 0">searching…</div>';
   try{
     const r = await fetch(`${DEX}/search?q=${encodeURIComponent(q)}`);
     const pairs = (await r.json()).pairs||[];
+    // one entry per token (deepest-liquidity pair); drop impersonators that
+    // reuse a major's ticker on a fake mint, and require real liquidity.
     const byMint = {};
     for(const p of pairs){
       if(p.chainId!=='solana' || !p.baseToken?.address) continue;
-      const m = p.baseToken.address, liq=(p.liquidity?.usd||0);
-      if(!byMint[m] || liq>byMint[m].liq) byMint[m]={mint:m,symbol:p.baseToken.symbol,name:p.baseToken.name,price:p.priceUsd,liq};
+      const m=p.baseToken.address, sym=(p.baseToken.symbol||''), liq=(p.liquidity?.usd||0), vol=(p.volume?.h24||0);
+      const known=KNOWN[sym.toLowerCase()];
+      if(known && known.mint!==m) continue;                 // fake "SOL"/"USDC" etc.
+      const img=(p.info&&p.info.imageUrl)||'';
+      const cur=byMint[m];
+      if(!cur || liq>cur.liq){
+        byMint[m]={mint:m,symbol:sym,name:p.baseToken.name,price:p.priceUsd,liq,vol,img:img||(cur&&cur.img)||''};
+      } else if(img && !cur.img){ cur.img=img; }
     }
-    const list = Object.values(byMint).sort((a,b)=>b.liq-a.liq).slice(0,8);
-    if(!list.length){ $('results').innerHTML='<div class="dim" style="padding:8px 0">no tokens found</div>'; return; }
+    // require real liquidity to weed out dust/scam clones; fall back if a
+    // brand-new coin is all that matches.
+    const ranked = arr => arr.sort((a,b)=> b.liq-a.liq || b.vol-a.vol);
+    let list = ranked(Object.values(byMint).filter(t=>t.liq>=2000));
+    if(!list.length) list = ranked(Object.values(byMint).filter(t=>t.liq>0));
+    // surface a canonical major if the query names one (e.g. "solana" -> SOL)
+    const k = KNOWN[ALIAS[q.toLowerCase()] || q.toLowerCase()];
+    if(k && !list.some(t=>t.mint===k.mint))
+      list.unshift({mint:k.mint,symbol:k.sym,name:k.name,price:0,liq:Infinity,vol:0,img:k.logo});
+    list = list.slice(0,7);
+    if(!list.length){ $('results').innerHTML='<div class="dim" style="padding:10px 0">no tokens found</div>'; return; }
     $('results').innerHTML='';
     for(const t of list){
+      const kn=KNOWN[(t.symbol||'').toLowerCase()];
+      const logo = (kn&&kn.mint===t.mint) ? kn.logo : t.img;
+      const verified = (kn&&kn.mint===t.mint) || t.liq>50000;
+      const pxTxt = t.price ? `$${fmt(t.price,6)}` : '';
+      const lqTxt = t.liq===Infinity ? '' : `liq $${fmt(t.liq,0)}`;
       const el=document.createElement('div'); el.className='res';
-      el.innerHTML=`<img src="${LOGO(t.mint)}" onerror="this.style.visibility='hidden'">
-        <div><div class="sym">${t.symbol||'?'}</div><div class="nm">${(t.name||'').slice(0,22)}</div></div>
-        <div class="px"><div class="p">$${t.price?fmt(t.price,6):'—'}</div><div class="lq">liq $${fmt(t.liq,0)}</div></div>`;
+      el.innerHTML=`${avatar(t.symbol,logo,30)}
+        <div><div class="sym">${esc(t.symbol||'?')}${verified?'<span class="ok">✓</span>':''}</div><div class="nm">${esc((t.name||'').slice(0,22))}</div></div>
+        <div class="px"><div class="p">${pxTxt}</div><div class="lq">${lqTxt}</div></div>`;
       el.onclick=()=>selectToken(t);
       $('results').appendChild(el);
     }
-  }catch(e){ $('results').innerHTML='<div class="red" style="padding:8px 0">search failed</div>'; }
+  }catch(e){ $('results').innerHTML='<div class="red" style="padding:10px 0">search failed</div>'; }
 }
 async function selectToken(t){
   $('search').style.display='none';
   const decimals = await getDecimals(t.mint);
-  token = { mint:t.mint, symbol:t.symbol||t.mint.slice(0,4), name:t.name, decimals, logo:LOGO(t.mint), priceUsd:Number(t.price)||0 };
-  renderTokens(); refreshBalances(); scheduleQuote();
+  const kn=KNOWN[(t.symbol||'').toLowerCase()];
+  const logo = (kn&&kn.mint===t.mint) ? kn.logo : (t.img||'');
+  token = { mint:t.mint, symbol:t.symbol||t.mint.slice(0,4), name:t.name, decimals, logo, priceUsd:Number(t.price)||0 };
+  renderTokens(); refreshBalances(); scheduleQuote(); checkSafety(t.mint);
 }
 function renderTokens(){
-  const solBtn = `<span>SOL</span>`;
-  const tokBtn = token ? `<img src="${token.logo}" onerror="this.style.display='none'"><span>${token.symbol}</span>` : `<span>select</span><span class="car">▾</span>`;
+  const solBtn = `${avatar('SOL',KNOWN.sol.logo,20)}<span>SOL</span>`;
+  const tokBtn = token
+    ? `${avatar(token.symbol,token.logo,20)}<span>${esc(token.symbol)}</span>`
+    : `<span>select</span><span class="car"></span>`;
   if(side==='buy'){ $('payTok').innerHTML=solBtn; $('recTok').innerHTML=tokBtn; }
   else            { $('payTok').innerHTML=tokBtn; $('recTok').innerHTML=solBtn; }
 }
@@ -345,7 +475,8 @@ async function getQuote(){
 }
 async function jupQuote(inMint,outMint,amountRaw){
   try{
-    const r=await fetch(`${JUP}/swap/v1/quote?inputMint=${inMint}&outputMint=${outMint}&amount=${amountRaw}&slippageBps=${Math.min(slippageBps,MAX_SLIPPAGE_BPS)}`);
+    const fee = FEE_ON() ? `&platformFeeBps=${FEE_BPS}` : '';
+    const r=await fetch(`${JUP}/swap/v1/quote?inputMint=${inMint}&outputMint=${outMint}&amount=${amountRaw}&slippageBps=${Math.min(slippageBps,MAX_SLIPPAGE_BPS)}${fee}`);
     const d=await r.json();
     if(d.error) return {err:d.error};
     if(!d.routePlan?.length) return {err:'no route'};
@@ -370,7 +501,12 @@ $('swapBtn').onclick = async () => {
     msg('building transaction…','dim');
     const r=await fetch(`${JUP}/swap/v1/swap`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({quoteResponse:quote,userPublicKey:wallet.publicKey.toString(),
-        wrapAndUnwrapSol:true,dynamicComputeUnitLimit:true,prioritizationFeeLamports:'auto'})});
+        wrapAndUnwrapSol:true,dynamicComputeUnitLimit:true,
+        ...(FEE_ON() ? {feeAccount:FEE_ACCOUNT} : {}),
+        // Jupiter auto-tunes slippage up to the user's cap (less MEV loss),
+        // and bids a very-high priority fee (capped) so trades actually land.
+        dynamicSlippage:{maxBps:Math.min(slippageBps,MAX_SLIPPAGE_BPS)},
+        prioritizationFeeLamports:{priorityLevelWithMaxLamports:{maxLamports:2000000,priorityLevel:'veryHigh'}}})});
     const {swapTransaction,error}=await r.json();
     if(error||!swapTransaction) throw new Error(error||'no transaction');
     const tx=VersionedTransaction.deserialize(Uint8Array.from(atob(swapTransaction),c=>c.charCodeAt(0)));

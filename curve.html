@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" class="preload">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>curve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=block" rel="stylesheet">
+<!-- Bonding-curve launches for h00d.fun. Non-custodial: the visitor signs in
+     their own wallet; the h00d_market program holds the curve reserves on-chain.
+     Styled to match the site. Set PROGRAM_ID after you deploy to go live. -->
+<style>
+  html.preload body{visibility:hidden}
+  :root{ --bg:#181a24; --green:#4fe6a0; --txt:#eef1f5; --txt2:#aab2c0;
+         --g2:#3a4152; --g3:#6b7488; --g4:#8b93a4; --g5:#6b7488;
+         --line:#2d3242; --line2:#313748; --box:#2a6b4c;
+         --red:#ff7a85; --orange:#e0a040; --cy:#5bd6e6; --mono:'VT323',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--green);font-family:var(--mono);font-size:20px;line-height:1.4;
+       min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem}
+  .wrap{width:100%;max-width:380px;position:relative}
+  .back{display:inline-block;color:var(--g4);font-size:15px;letter-spacing:2px;text-decoration:none;margin-bottom:1rem}
+  .back:hover{color:var(--green)}
+  .bar{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:1.2rem}
+  .title{color:var(--green);font-size:18px;letter-spacing:3px}
+  .lnk{background:none;border:none;font-family:var(--mono);color:var(--green);font-size:14px;cursor:pointer;letter-spacing:2px}
+  .lnk:hover{color:#eef1f5}
+
+  .tabs{display:flex;gap:1.5rem;margin-bottom:1.2rem}
+  .tab{background:none;border:none;font-family:var(--mono);color:var(--g5);font-size:18px;letter-spacing:2px;cursor:pointer;padding-bottom:4px}
+  .tab.on{color:var(--green);border-bottom:1px solid var(--green)}
+  .tab:hover{color:var(--green)}
+
+  .fld{margin-bottom:1rem}
+  .label{font-size:13px;color:var(--g4);letter-spacing:3px;margin-bottom:6px}
+  .inp{width:100%;background:none;border:none;border-bottom:1px solid var(--line2);font-family:var(--mono);
+       font-size:20px;color:var(--txt);caret-color:var(--green);outline:none;padding:5px 0;-webkit-text-fill-color:#eef1f5}
+  .inp::placeholder{color:#5f6675;-webkit-text-fill-color:#5f6675}
+  .row{display:flex;gap:1rem}.row>.fld{flex:1}
+
+  .floorbox{font-size:15px;letter-spacing:1px;color:var(--g4);margin:.6rem 0 1rem;
+            border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:.7rem 0;display:flex;justify-content:space-between}
+  .floorbox b{color:var(--green)}
+
+  .prog{height:6px;background:var(--g2);margin:.2rem 0 1.1rem;position:relative;overflow:hidden}
+  .prog > i{display:block;height:100%;background:var(--green);width:0%}
+  .quote{font-size:14px;color:var(--g4);letter-spacing:1px;margin:.2rem 0 .6rem;min-height:16px}
+  .quote b{color:var(--green)}
+
+  .cta{width:100%;background:none;border:1px solid var(--box);font-family:var(--mono);color:var(--green);
+       font-size:20px;letter-spacing:3px;padding:12px;cursor:pointer;margin-top:.4rem}
+  .cta:hover:not(:disabled){border-color:var(--green);background:rgba(79,230,160,.05);color:#eef1f5}
+  .cta:disabled{color:var(--g3);cursor:not-allowed}
+  .cta.sell{border-color:#5a2e30;color:var(--red)}
+  .cta.sell:hover:not(:disabled){border-color:var(--red);background:rgba(255,122,133,.05);color:#eef1f5}
+  .msg{margin-top:14px;font-size:15px;min-height:18px;letter-spacing:1px;color:var(--g4)}
+  .green{color:var(--green)!important}.red{color:var(--red)!important}.cy{color:var(--cy)!important}.dim{color:var(--g4)!important}
+  a{color:var(--green)}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .locked{display:none;color:var(--txt2);font-size:18px;text-align:center;padding:3rem 0;letter-spacing:2px}
+  .soon{display:none;color:var(--g4);font-size:16px;text-align:center;padding:2.5rem 0;letter-spacing:2px;line-height:1.8}
+  .boot{color:var(--g4);font-size:16px;text-align:center;padding:3rem 0;letter-spacing:2px;line-height:1.7}
+  .empty{color:var(--g4);font-size:15px;text-align:center;padding:1.5rem 0;letter-spacing:1px}
+  .banner{font-size:13px;letter-spacing:1px;color:var(--orange);border:1px solid #4a3a22;
+          background:rgba(224,160,64,.04);padding:8px 12px;margin-bottom:1.1rem;text-align:center}
+</style>
+<script>
+  (function(){var s=function(){document.documentElement.classList.remove('preload');};
+   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(s);} setTimeout(s,1200);})();
+  function bootErr(t){ var b=document.getElementById('boot'); if(b){ b.style.display='block';
+    b.innerHTML='<span style="color:#ff7a85">'+t+'</span><br><span style="color:#6b7488;font-size:13px">reload, or check your connection</span>'; } }
+  window.addEventListener('error', function(e){ bootErr('couldn’t load: '+(e.message||'script error')); });
+  window.addEventListener('unhandledrejection', function(){ bootErr('couldn’t load libraries'); });
+  setTimeout(function(){ var b=document.getElementById('boot'); if(b && b.dataset.live!=='1') bootErr('still loading… the CDN may be slow'); }, 8000);
+</script>
+  <link rel="stylesheet" href="cute.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">‹ back</a>
+  <div class="bar">
+    <span class="title">curve</span>
+    <button id="connect" class="lnk" style="display:none">[ connect ]</button>
+  </div>
+
+  <div id="boot" class="boot">loading…</div>
+
+  <div id="locked" class="locked">log in to use the curve</div>
+
+  <div id="soon" class="soon">curve opening soon —<br>the on-chain program isn't live yet</div>
+
+  <div id="body" style="display:none">
+    <div id="banner" class="banner" style="display:none">preview — sample data · goes live when the program is deployed</div>
+
+    <div class="fld">
+      <div class="label">token mint</div>
+      <input id="mint" class="inp" style="font-size:16px" placeholder="paste a token mint address" autocomplete="off">
+    </div>
+
+    <div class="floorbox">
+      <span>price</span><span><b id="priceVal">—</b> ◎/coin</span>
+    </div>
+    <div class="floorbox" style="border-top:none;margin-top:-1rem">
+      <span>raised</span><span><b id="raisedVal">—</b> / 85 ◎</span>
+    </div>
+    <div class="prog"><i id="progBar"></i></div>
+
+    <!-- when no curve exists for this mint: offer to create one -->
+    <div id="createView" style="display:none">
+      <div class="empty">no curve for this token yet</div>
+      <button id="createBtn" class="cta">[ launch this token into a curve ]</button>
+      <div class="label" style="margin-top:.8rem;line-height:1.5">deposits your full balance of this token into the
+        curve so people can buy it. you must hold the supply.</div>
+    </div>
+
+    <!-- trade view: buy / sell on the curve -->
+    <div id="tradeView" style="display:none">
+      <div class="tabs">
+        <button id="tabBuy" class="tab on">[ buy ]</button>
+        <button id="tabSell" class="tab">[ sell ]</button>
+      </div>
+
+      <div id="buyView">
+        <div class="fld"><div class="label">spend ◎ (SOL)</div>
+          <input id="bAmt" class="inp" type="number" min="0" step="any" placeholder="0.0"></div>
+        <div id="buyQuote" class="quote"></div>
+        <button id="buyBtn" class="cta">[ buy ]</button>
+      </div>
+
+      <div id="sellView" style="display:none">
+        <div class="fld"><div class="label">sell amount (coins)</div>
+          <input id="sAmt" class="inp" type="number" min="0" step="any" placeholder="0"></div>
+        <div id="sellQuote" class="quote"></div>
+        <button id="sellBtn" class="cta sell">[ sell ]</button>
+      </div>
+    </div>
+
+    <div id="graduated" class="soon" style="display:none">this curve has graduated —<br>trade it on the DEX</div>
+
+    <div id="msg" class="msg dim"></div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "@solana/web3.js": "https://esm.sh/@solana/web3.js@1.98.0",
+  "buffer": "https://esm.sh/buffer@6.0.3"
+}}
+</script>
+<script type="module">
+import { Buffer } from 'buffer';
+globalThis.Buffer = globalThis.Buffer || Buffer;
+import { Connection, PublicKey, Transaction, TransactionInstruction, SystemProgram, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+  TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction
+} from 'https://esm.sh/@solana/spl-token@0.4.8?external=@solana/web3.js,buffer';
+
+// ── config ───────────────────────────────────────────────────────────────
+const RPC = 'https://mainnet.helius-rpc.com/?api-key=09fb7d5a-50cb-4b0a-8f9d-db40d1986eb4';
+// After you deploy h00d_market, paste its program id + your fee wallet here.
+// Empty PROGRAM_ID = the curve shows "opening soon" and stays inert.
+const PROGRAM_ID_STR   = '';   // ← paste your deployed program id here to go live
+const FEE_RECIPIENT_STR = '3S4VNaMUDBjbD9AkwGztmis9QUfyXfweYyzim4Vy3Y5f';   // must equal FEE_RECIPIENT in the program
+
+const LIVE = PROGRAM_ID_STR.length >= 32;
+const PROGRAM_ID    = LIVE ? new PublicKey(PROGRAM_ID_STR) : null;
+const FEE_RECIPIENT = FEE_RECIPIENT_STR ? new PublicKey(FEE_RECIPIENT_STR) : null;
+
+const FEE_BPS = 100n, BPS_DENOM = 10000n;
+const GRADUATION_LAMPORTS = 85_000_000_000n;
+const SLIPPAGE_BPS = 100n;   // 1% — protects the user's min-out
+const PRIORITY_FEE_MICROLAMPORTS = 100_000; // priority fee per compute unit so txs land when mainnet is busy
+
+// ── login gate (matches the rest of the site) ────────────────────────────
+const REQUIRE_LOGIN = true;
+const SB_PROJECT_REF = 'vbkeiyrrujxmavvhtbve';
+function isLoggedIn(){
+  if(!REQUIRE_LOGIN) return true;
+  try{ const t = JSON.parse(localStorage.getItem('sb-'+SB_PROJECT_REF+'-auth-token'));
+       const exp = t?.expires_at || t?.currentSession?.expires_at;
+       if(exp && exp*1000 < Date.now()) return false;
+       return !!(t?.access_token || t?.currentSession?.access_token); }
+  catch(e){ return false; }
+}
+
+const connection = new Connection(RPC, 'confirmed');
+const $ = id => document.getElementById(id);
+const msg = (t,c)=>{ const m=$('msg'); m.className='msg '+(c||'dim'); m.innerHTML=t; };
+let wallet = null, mint = null, decimals = 9, curve = null;
+
+// ── encoding helpers ──────────────────────────────────────────────────────
+const enc = s => new TextEncoder().encode(s);
+function u64le(v){ const b=new Uint8Array(8); let n=BigInt(v); for(let i=0;i<8;i++){ b[i]=Number(n & 0xffn); n>>=8n; } return b; }
+function readU64(buf,off){ let v=0n; for(let i=0;i<8;i++) v += BigInt(buf[off+i]) << (8n*BigInt(i)); return v; }
+async function disc(name){
+  const h = new Uint8Array(await crypto.subtle.digest('SHA-256', enc('global:'+name)));
+  return h.slice(0,8);
+}
+function cat(...arrs){ let n=0; arrs.forEach(a=>n+=a.length); const o=new Uint8Array(n); let i=0; arrs.forEach(a=>{o.set(a,i);i+=a.length;}); return o; }
+const pow10 = d => 10n ** BigInt(d);
+
+// ── PDAs ──────────────────────────────────────────────────────────────────
+const curvePda    = m => PublicKey.findProgramAddressSync([enc('curve'),     m.toBytes()], PROGRAM_ID)[0];
+const solVaultPda = m => PublicKey.findProgramAddressSync([enc('sol_vault'), m.toBytes()], PROGRAM_ID)[0];
+const tokenVault  = m => getAssociatedTokenAddressSync(m, curvePda(m), true);  // owner is the curve PDA
+
+// ── wallet ──────────────────────────────────────────────────────────────
+function provider(){
+  return (window.phantom?.solana?.isPhantom && window.phantom.solana)
+      || (window.solana?.isPhantom && window.solana)
+      || (window.solflare?.isSolflare && window.solflare) || null;
+}
+$('connect').onclick = async () => {
+  const p = provider();
+  if(!p) return msg('no wallet found — install <a href="https://phantom.app" target="_blank">phantom</a>','red');
+  try{ const r = await p.connect(); wallet = p;
+    const pk=(r.publicKey||p.publicKey).toString();
+    $('connect').textContent = pk.slice(0,4)+'…'+pk.slice(-4); msg('wallet connected','green');
+  }catch(e){ msg('connection cancelled','dim'); }
+};
+async function send(ix){
+  const tx = new Transaction().add(
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: PRIORITY_FEE_MICROLAMPORTS }),
+    ...ix
+  );
+  tx.feePayer = new PublicKey(wallet.publicKey.toString());
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+  tx.recentBlockhash = blockhash;
+  const { signature } = await wallet.signAndSendTransaction(tx);
+  await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'confirmed');
+  return signature;
+}
+
+// ── load a token's curve state ────────────────────────────────────────────
+async function loadToken(){
+  const v = $('mint').value.trim();
+  $('createView').style.display='none'; $('tradeView').style.display='none'; $('graduated').style.display='none';
+  try{ mint = new PublicKey(v); }catch(e){ mint=null; resetStats(); return; }
+  try{ const s = await connection.getTokenSupply(mint); decimals = s.value.decimals; }catch(e){ decimals = 9; }
+  await loadCurve();
+}
+function resetStats(){ $('priceVal').textContent='—'; $('raisedVal').textContent='—'; $('progBar').style.width='0%'; }
+async function loadCurve(){
+  curve = null;
+  let acc=null;
+  try{ acc = await connection.getAccountInfo(curvePda(mint)); }catch(e){}
+  if(!acc){
+    resetStats();
+    // no curve yet → let the holder create one
+    $('createView').style.display = wallet ? '' : 'none';
+    if(!wallet) msg('connect your wallet to launch a curve for this token','dim');
+    return;
+  }
+  const d = acc.data;
+  // Curve: 8 disc | 32 creator | 32 mint | 8 v_sol | 8 v_token | 8 real_sol | 8 real_token | 1 complete
+  curve = {
+    virtual_sol:   readU64(d,72),
+    virtual_token: readU64(d,80),
+    real_sol:      readU64(d,88),
+    real_token:    readU64(d,96),
+    complete:      d[104] !== 0,
+  };
+  // price per coin (◎) = v_sol/v_token * 10^decimals / 1e9
+  const pricePerCoin = Number(curve.virtual_sol) / Number(curve.virtual_token) * Number(pow10(decimals)) / 1e9;
+  $('priceVal').textContent = pricePerCoin > 0 ? pricePerCoin.toLocaleString(undefined,{maximumFractionDigits:9}) : '0';
+  $('raisedVal').textContent = (Number(curve.real_sol)/1e9).toLocaleString(undefined,{maximumFractionDigits:3});
+  $('progBar').style.width = Math.min(100, Number(curve.real_sol)*100/Number(GRADUATION_LAMPORTS)) + '%';
+  if(curve.complete){ $('graduated').style.display=''; refreshQuotes(); return; }
+  $('tradeView').style.display = '';
+  refreshQuotes();
+}
+
+// ── live quotes (constant-product, mirrors the program) ────────────────────
+function quoteBuy(solIn){
+  if(!curve) return null;
+  const lamportsIn = BigInt(Math.floor(solIn * 1e9));
+  if(lamportsIn <= 0n) return null;
+  const fee = lamportsIn * FEE_BPS / BPS_DENOM;
+  const solNet = lamportsIn - fee;
+  const k = curve.virtual_sol * curve.virtual_token;
+  const newVSol = curve.virtual_sol + solNet;
+  const tokensOut = curve.virtual_token - (k / newVSol);
+  if(tokensOut <= 0n || tokensOut > curve.real_token) return null;
+  return tokensOut;
+}
+function quoteSell(coinsIn){
+  if(!curve) return null;
+  const tokensIn = BigInt(Math.floor(coinsIn * Number(pow10(decimals))));
+  if(tokensIn <= 0n) return null;
+  const k = curve.virtual_sol * curve.virtual_token;
+  const newVToken = curve.virtual_token + tokensIn;
+  const newVSol = k / newVToken;
+  const gross = curve.virtual_sol - newVSol;
+  if(gross <= 0n || gross > curve.real_sol) return null;
+  const fee = gross * FEE_BPS / BPS_DENOM;
+  return { tokensIn, solOut: gross - fee };
+}
+function refreshQuotes(){
+  const b = parseFloat($('bAmt').value);
+  const to = (b>0) ? quoteBuy(b) : null;
+  $('buyQuote').innerHTML = to ? `≈ <b>${(Number(to)/Number(pow10(decimals))).toLocaleString(undefined,{maximumFractionDigits:4})}</b> coins` : '';
+  const s = parseFloat($('sAmt').value);
+  const q = (s>0) ? quoteSell(s) : null;
+  $('sellQuote').innerHTML = q ? `≈ <b>${(Number(q.solOut)/1e9).toLocaleString(undefined,{maximumFractionDigits:6})}</b> ◎` : '';
+}
+
+// ── actions ────────────────────────────────────────────────────────────────
+async function createCurve(){
+  if(!wallet) return msg('connect your wallet first','red');
+  if(!mint)   return msg('paste a token mint','red');
+  $('createBtn').disabled = true;
+  try{
+    const me = new PublicKey(wallet.publicKey.toString());
+    const creatorToken = getAssociatedTokenAddressSync(mint, me);
+    const bal = await connection.getTokenAccountBalance(creatorToken).catch(()=>null);
+    const supply = bal ? BigInt(bal.value.amount) : 0n;
+    if(supply <= 0n) return msg('you hold none of this token — mint it first','red'), $('createBtn').disabled=false;
+
+    const ix = [ new TransactionInstruction({ programId: PROGRAM_ID,
+      keys:[
+        {pubkey:me,isSigner:true,isWritable:true},
+        {pubkey:mint,isSigner:false,isWritable:false},
+        {pubkey:curvePda(mint),isSigner:false,isWritable:true},
+        {pubkey:solVaultPda(mint),isSigner:false,isWritable:true},
+        {pubkey:tokenVault(mint),isSigner:false,isWritable:true},
+        {pubkey:creatorToken,isSigner:false,isWritable:true},
+        {pubkey:TOKEN_PROGRAM_ID,isSigner:false,isWritable:false},
+        {pubkey:ASSOCIATED_TOKEN_PROGRAM_ID,isSigner:false,isWritable:false},
+        {pubkey:SystemProgram.programId,isSigner:false,isWritable:false},
+      ],
+      data: Buffer.from(cat(await disc('create_curve'), u64le(supply))) }) ];
+    msg('approve in your wallet…','cy');
+    const sig = await send(ix);
+    msg(`✅ curve launched — <a href="https://solscan.io/tx/${sig}" target="_blank">view ↗</a>`,'green');
+    await loadCurve();
+  }catch(e){ msg('launch failed: '+(e.message||e),'red'); }
+  $('createBtn').disabled = false;
+}
+
+async function tradeBuy(){
+  if(!wallet) return msg('connect your wallet first','red');
+  if(!FEE_RECIPIENT) return msg('curve not configured (fee wallet)','red');
+  const solIn = parseFloat($('bAmt').value);
+  if(!(solIn>0)) return msg('enter an amount','red');
+  const expected = quoteBuy(solIn);
+  if(!expected) return msg('not enough liquidity for that size','red');
+  const minOut = expected * (BPS_DENOM - SLIPPAGE_BPS) / BPS_DENOM;
+  $('buyBtn').disabled = true;
+  try{
+    const me = new PublicKey(wallet.publicKey.toString());
+    const userToken = getAssociatedTokenAddressSync(mint, me);
+    const ix = [];
+    if(!(await connection.getAccountInfo(userToken)))
+      ix.push(createAssociatedTokenAccountInstruction(me, userToken, me, mint));
+    ix.push(new TransactionInstruction({ programId: PROGRAM_ID,
+      keys: tradeKeys(me, userToken),
+      data: Buffer.from(cat(await disc('buy'), u64le(BigInt(Math.floor(solIn*1e9))), u64le(minOut))) }));
+    msg('approve in your wallet…','cy');
+    const sig = await send(ix);
+    msg(`✅ bought — <a href="https://solscan.io/tx/${sig}" target="_blank">view ↗</a>`,'green');
+    $('bAmt').value=''; await loadCurve();
+  }catch(e){ msg('buy failed: '+(e.message||e),'red'); }
+  $('buyBtn').disabled = false;
+}
+
+async function tradeSell(){
+  if(!wallet) return msg('connect your wallet first','red');
+  if(!FEE_RECIPIENT) return msg('curve not configured (fee wallet)','red');
+  const coinsIn = parseFloat($('sAmt').value);
+  if(!(coinsIn>0)) return msg('enter an amount','red');
+  const q = quoteSell(coinsIn);
+  if(!q) return msg('not enough liquidity for that size','red');
+  const minOut = q.solOut * (BPS_DENOM - SLIPPAGE_BPS) / BPS_DENOM;
+  $('sellBtn').disabled = true;
+  try{
+    const me = new PublicKey(wallet.publicKey.toString());
+    const userToken = getAssociatedTokenAddressSync(mint, me);
+    const ix = [ new TransactionInstruction({ programId: PROGRAM_ID,
+      keys: tradeKeys(me, userToken),
+      data: Buffer.from(cat(await disc('sell'), u64le(q.tokensIn), u64le(minOut))) }) ];
+    msg('approve in your wallet…','cy');
+    const sig = await send(ix);
+    msg(`✅ sold — <a href="https://solscan.io/tx/${sig}" target="_blank">view ↗</a>`,'green');
+    $('sAmt').value=''; await loadCurve();
+  }catch(e){ msg('sell failed: '+(e.message||e),'red'); }
+  $('sellBtn').disabled = false;
+}
+
+// shared account list for buy/sell (matches the program's Trade context order)
+function tradeKeys(me, userToken){
+  return [
+    {pubkey:me,isSigner:true,isWritable:true},
+    {pubkey:curvePda(mint),isSigner:false,isWritable:true},
+    {pubkey:solVaultPda(mint),isSigner:false,isWritable:true},
+    {pubkey:tokenVault(mint),isSigner:false,isWritable:true},
+    {pubkey:userToken,isSigner:false,isWritable:true},
+    {pubkey:mint,isSigner:false,isWritable:false},
+    {pubkey:FEE_RECIPIENT,isSigner:false,isWritable:true},
+    {pubkey:TOKEN_PROGRAM_ID,isSigner:false,isWritable:false},
+    {pubkey:SystemProgram.programId,isSigner:false,isWritable:false},
+  ];
+}
+
+// ── wiring ───────────────────────────────────────────────────────────────
+let mintT=null;
+$('mint').addEventListener('input', ()=>{ clearTimeout(mintT); mintT=setTimeout(loadToken,400); });
+$('bAmt').addEventListener('input', refreshQuotes);
+$('sAmt').addEventListener('input', refreshQuotes);
+$('tabBuy').onclick  = () => { $('tabBuy').classList.add('on'); $('tabSell').classList.remove('on'); $('buyView').style.display=''; $('sellView').style.display='none'; };
+$('tabSell').onclick = () => { $('tabSell').classList.add('on'); $('tabBuy').classList.remove('on'); $('sellView').style.display=''; $('buyView').style.display='none'; };
+$('createBtn').onclick = createCurve;
+$('buyBtn').onclick = tradeBuy;
+$('sellBtn').onclick = tradeSell;
+
+const PREVIEW = !LIVE;
+function applyGate(){
+  const ok = isLoggedIn();
+  const boot = $('boot'); if(boot){ boot.dataset.live='1'; boot.style.display='none'; }
+  $('locked').style.display = ok ? 'none' : '';
+  if(!ok){ $('body').style.display='none'; $('soon').style.display='none'; $('connect').style.display='none'; return; }
+  $('connect').style.display = '';
+  if(PREVIEW){ $('body').style.display='none'; $('soon').style.display=''; return; }
+  $('soon').style.display='none';
+  $('body').style.display='';
+}
+applyGate();
+window.addEventListener('storage', e => { if(e.key && e.key.includes(SB_PROJECT_REF)) applyGate(); });
+window.addEventListener('load', () => {
+  const p = provider();
+  if(p?.isConnected && p.publicKey){ wallet=p; const pk=p.publicKey.toString();
+    $('connect').textContent = pk.slice(0,4)+'…'+pk.slice(-4); if(mint) loadCurve(); }
+});
+</script>
+</body>
+</html>

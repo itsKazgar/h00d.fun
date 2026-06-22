@@ -1,0 +1,91 @@
+/* h00d.fun — cute theme layer.
+   Loaded AFTER each page's inline <style> so it wins the cascade. The friendly
+   minty palette is already set in-page; this file adds the soft rounded shapes,
+   chunky "candy" buttons, gentle shadows and springy motion. Tweak it here to
+   restyle the whole site at once. */
+
+:root{ --spring:cubic-bezier(.34,1.56,.64,1); --gd:#2bbd7e; --rd:#c9545d; }
+
+/* playful backdrop blobs, layered over each page's background colour */
+body{
+  background-image:
+    radial-gradient(55% 45% at 8% 0%, rgba(79,230,160,.10), transparent 70%),
+    radial-gradient(52% 42% at 100% 100%, rgba(255,178,125,.09), transparent 70%) !important;
+  background-attachment: fixed;
+}
+
+/* ───────── tool pages: swap · mint · market · curve · discover ───────── */
+
+/* drop the page content onto a soft rounded card */
+.wrap{ background:#1e2230; border:1px solid #2d3242; border-radius:20px;
+       padding:1.5rem 1.4rem 1.7rem; box-shadow:0 12px 34px rgba(0,0,0,.32); }
+
+/* rounded inputs with a friendly focus ring */
+.inp{ background:#262b39; border:1px solid #2d3242; border-radius:12px; padding:10px 13px; }
+.inp::placeholder{ color:#5f6675; -webkit-text-fill-color:#5f6675; }
+.inp:focus{ border-color:#4fe6a0; box-shadow:0 0 0 3px rgba(79,230,160,.16); }
+
+/* chunky candy primary button (squishes down on press) */
+.cta{ border:none; border-radius:14px; background:#4fe6a0; color:#0f221a;
+      box-shadow:0 5px 0 var(--gd);
+      transition:transform .12s var(--spring), box-shadow .12s, filter .12s; }
+.cta:hover:not(:disabled){ background:#4fe6a0; color:#0f221a; transform:translateY(-1px); filter:brightness(1.06); }
+.cta:active:not(:disabled){ transform:translateY(5px); box-shadow:0 0 0 var(--gd); }
+.cta:disabled{ background:#262b39; color:#6b7488; box-shadow:none; }
+.cta.sell{ background:#ff7a85; color:#2a0f12; box-shadow:0 5px 0 var(--rd); }
+.cta.sell:hover:not(:disabled){ background:#ff7a85; color:#2a0f12; filter:brightness(1.05); }
+
+/* pill buy / cancel buttons */
+.buy{ border:none; border-radius:999px; background:#4fe6a0; color:#0f221a;
+      box-shadow:0 3px 0 var(--gd); transition:transform .12s var(--spring), box-shadow .12s; }
+.buy:hover{ background:#4fe6a0; color:#0f221a; transform:translateY(-1px); }
+.buy:active{ transform:translateY(3px); box-shadow:0 0 0 var(--gd); }
+.buy.cancel{ background:#2a2f3d; color:#ff7a85; box-shadow:0 3px 0 #20242f; }
+.buy.cancel:hover{ background:#2a2f3d; color:#ff7a85; }
+
+/* pill tabs */
+.tab{ border:1px solid #2d3242; background:#262b39; border-radius:999px; padding:5px 16px; }
+.tab.on{ background:rgba(79,230,160,.16); color:#4fe6a0; border-color:#4fe6a0; }
+.tab.on{ border-bottom:1px solid #4fe6a0; }
+
+/* connect chip */
+.lnk{ background:#262b39; border:1px solid #2d3242; border-radius:999px; padding:4px 13px; }
+.lnk:hover{ color:#4fe6a0; border-color:#4fe6a0; }
+
+/* soft rounded rows / boxes */
+.listing{ background:#222634; border:1px solid #2d3242; border-radius:12px; padding:9px 13px; margin-bottom:8px; }
+.floorbox{ background:#222634; border:1px solid #2d3242; border-radius:12px; padding:11px 14px; }
+.banner{ border-radius:10px; }
+.tgl{ border-radius:999px; }                    /* mint toggles */
+.prog{ border-radius:999px; overflow:hidden; }  /* curve progress bar */
+.prog>i{ border-radius:999px; }
+.res{ border-radius:12px; border-bottom:none; padding:9px 11px; }  /* swap search rows */
+.res:hover{ background:#222634; opacity:1; }
+
+/* ───────── home / feed (index.html) ───────── */
+
+input[type=text], input[type=password], input[type=number], textarea{
+  background:#262b39 !important; border:1px solid #2d3242 !important; border-radius:12px;
+  padding:10px 13px !important; }
+input[type=text]:focus, input[type=password]:focus, input[type=number]:focus, textarea:focus{
+  border-color:#4fe6a0 !important; box-shadow:0 0 0 3px rgba(79,230,160,.16); }
+
+/* primary actions become candy pills (but not the send-sol method buttons) */
+.action:not(.sol-method){ background:#4fe6a0; color:#0f221a; border-radius:999px; padding:9px 22px;
+  box-shadow:0 4px 0 var(--gd); transition:transform .12s var(--spring), box-shadow .12s, filter .12s; }
+.action:not(.sol-method):hover{ color:#0f221a; transform:translateY(-1px); filter:brightness(1.06); }
+.action:not(.sol-method):active{ transform:translateY(4px); box-shadow:0 0 0 var(--gd); }
+
+.prof-action{ border-radius:999px; }
+.menu-drop{ border-radius:12px; overflow:hidden; box-shadow:0 12px 30px rgba(0,0,0,.4); }
+.sol-box{ border-radius:18px; box-shadow:0 16px 40px rgba(0,0,0,.45); }
+.sol-method{ border-radius:12px !important; }
+.sol-qr-canvas{ border-radius:14px; }
+
+/* hub tiles → cute rounded bounce (overrides the earlier terminal accent style) */
+.tile{ border:1px solid #2d3242 !important; border-radius:14px; padding:14px 18px;
+       transition:transform .2s var(--spring), border-color .2s, background .2s, box-shadow .2s; }
+.tile::before{ display:none; }
+.tile:hover{ border-color:#4fe6a0 !important; background:#20232e; transform:translateY(-3px) scale(1.015);
+             box-shadow:0 10px 22px rgba(79,230,160,.14); }
+.tile:hover .arr{ color:#4fe6a0; transform:translateX(5px); }

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" class="preload">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>discover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=block" rel="stylesheet">
+<!-- Public directory of coins launched on h00d.fun. Reads the Supabase
+     `launches` table (run supabase_schema.sql first). Styled to match the site. -->
+<style>
+  html.preload body{visibility:hidden}
+  :root{ --bg:#181a24; --green:#4fe6a0; --txt:#eef1f5; --txt2:#aab2c0;
+         --g2:#3a4152; --g3:#6b7488; --g4:#8b93a4; --g5:#6b7488;
+         --line:#2d3242; --line2:#313748; --box:#2a6b4c;
+         --red:#ff7a85; --orange:#e0a040; --cy:#5bd6e6; --mono:'VT323',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--green);font-family:var(--mono);font-size:20px;line-height:1.4;
+       min-height:100vh;min-height:100dvh;display:flex;justify-content:center;padding:2.5rem 1.5rem}
+  .wrap{width:100%;max-width:420px}
+  .back{display:inline-block;color:var(--g4);font-size:15px;letter-spacing:2px;text-decoration:none;margin-bottom:1rem}
+  .back:hover{color:var(--green)}
+  .bar{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:1.1rem}
+  .title{color:var(--green);font-size:18px;letter-spacing:3px}
+  .count{color:var(--g4);font-size:14px;letter-spacing:1px}
+
+  .search{width:100%;background:none;border:none;border-bottom:1px solid var(--line2);font-family:var(--mono);
+          font-size:18px;color:var(--txt);caret-color:var(--green);outline:none;padding:6px 0;margin-bottom:1rem;-webkit-text-fill-color:#eef1f5}
+  .search::placeholder{color:#5f6675;-webkit-text-fill-color:#5f6675}
+
+  .row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);text-decoration:none}
+  .row:hover{opacity:.75}
+  .ava{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+       flex-shrink:0;color:#181a24;font-size:18px}
+  .mid{min-width:0;flex:1}
+  .nm{color:var(--txt);font-size:18px;letter-spacing:1px;display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sym{color:var(--green);font-size:13px}
+  .badge{color:var(--green);font-size:11px;border:1px solid var(--box);border-radius:3px;padding:0 4px;letter-spacing:1px}
+  .sub{color:var(--g4);font-size:12px;letter-spacing:1px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .r{margin-left:auto;text-align:right;flex-shrink:0}
+  .r .t{color:var(--g4);font-size:12px}
+  .r .go{color:var(--green);font-size:13px;letter-spacing:1px}
+
+  .empty{color:var(--g4);font-size:15px;text-align:center;padding:2.5rem 0;letter-spacing:1px;line-height:1.8}
+  a{color:var(--green)}
+</style>
+<script>
+  (function(){var s=function(){document.documentElement.classList.remove('preload');};
+   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(s);} setTimeout(s,1200);})();
+</script>
+  <link rel="stylesheet" href="cute.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">‹ back</a>
+  <div class="bar">
+    <span class="title">discover</span>
+    <span class="count" id="count"></span>
+  </div>
+  <input id="search" class="search" placeholder="search name or symbol…" autocomplete="off">
+  <div id="list"><div class="empty">loading…</div></div>
+</div>
+
+<script>
+const SB_URL  = 'https://vbkeiyrrujxmavvhtbve.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZia2VpeXJydWp4bWF2dmh0YnZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTgwNDgsImV4cCI6MjA5Njc3NDA0OH0.eZUC4X-p8qFRT-Ga_xAxAWaOH5WQexEXgtJGul242Fo';
+
+const $ = id => document.getElementById(id);
+let all = [];
+
+function hue(s){ let h=0; for(const c of (s||'?')) h=(h*31+c.charCodeAt(0))%360; return h; }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function timeAgo(ts){
+  const d = Math.floor((Date.now() - new Date(ts))/1000);
+  if(d<60) return 'just now';
+  if(d<3600) return Math.floor(d/60)+'m';
+  if(d<86400) return Math.floor(d/3600)+'h';
+  return Math.floor(d/86400)+'d';
+}
+
+async function load(){
+  try{
+    const r = await fetch(`${SB_URL}/rest/v1/launches?select=*&order=created_at.desc&limit=300`,
+      { headers:{ apikey:SB_ANON, Authorization:'Bearer '+SB_ANON } });
+    if(!r.ok) throw new Error('http '+r.status);
+    all = await r.json();
+    render();
+  }catch(e){
+    $('list').innerHTML = `<div class="empty">couldn't load the directory.<br><span style="color:#6b7488">${esc(e.message||e)}</span></div>`;
+  }
+}
+
+function render(){
+  const q = $('search').value.trim().toLowerCase();
+  const list = q ? all.filter(t => (t.name||'').toLowerCase().includes(q) || (t.symbol||'').toLowerCase().includes(q)) : all;
+  $('count').textContent = all.length ? all.length + (all.length===1?' coin':' coins') : '';
+  if(!all.length){ $('list').innerHTML = '<div class="empty">no launches yet.<br>be the first — hit <a href="/launch.html">mint</a>.</div>'; return; }
+  if(!list.length){ $('list').innerHTML = '<div class="empty">nothing matches “'+esc(q)+'”.</div>'; return; }
+
+  $('list').innerHTML = '';
+  for(const t of list){
+    const sym = (t.symbol||'?').toUpperCase();
+    const letter = (sym[0]||'?');
+    const m = t.mint || '';
+    const a = document.createElement('a');
+    a.className = 'row';
+    a.href = 'https://solscan.io/token/' + m;
+    a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML =
+      `<span class="ava" style="background:hsl(${hue(sym)},55%,52%)">${esc(letter)}</span>`
+    + `<span class="mid">`
+    +   `<span class="nm">${esc(t.name||'untitled')} <span class="sym">${esc(sym)}</span>`
+    +     (t.renounced ? ` <span class="badge">renounced ✓</span>` : '')
+    +   `</span>`
+    +   `<span class="sub">${esc(m.slice(0,4))}…${esc(m.slice(-4))} · by ${esc((t.creator||'').slice(0,4))}…</span>`
+    + `</span>`
+    + `<span class="r"><div class="t">${timeAgo(t.created_at)}</div>`
+    +   `<a class="go" href="/swap.html" onclick="event.stopPropagation()">trade →</a></span>`;
+    $('list').appendChild(a);
+  }
+}
+
+$('search').addEventListener('input', render);
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" class="preload">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>launch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=block" rel="stylesheet">
+<!-- Non-custodial SPL token launcher. Grinds a …hood vanity mint, mints in the
+     visitor's own wallet. The page/server never touch a private key. Matches h00d.fun. -->
+<style>
+  html.preload body{visibility:hidden}
+
+  /* Typography + colors lifted straight from h00d.fun — keep it identical */
+  :root{ --bg:#181a24; --green:#4fe6a0; --txt:#eef1f5; --txt2:#aab2c0;
+         --g2:#3a4152; --g3:#6b7488; --g4:#8b93a4; --g5:#6b7488;
+         --line:#2d3242; --line2:#313748; --box:#2a6b4c;
+         --red:#ff7a85; --orange:#e0a040; --cy:#5bd6e6; --mono:'VT323',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--green);font-family:var(--mono);font-size:20px;line-height:1.4;
+       min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:2.5rem 1.5rem}
+  .wrap{width:100%;max-width:360px;position:relative}
+  .back{display:inline-block;color:var(--g4);font-size:15px;letter-spacing:2px;text-decoration:none;margin-bottom:1rem}
+  .back:hover{color:var(--green)}
+
+  .bar{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:1.4rem}
+  .title{color:var(--green);font-size:18px;letter-spacing:3px}
+  .lnk{background:none;border:none;font-family:var(--mono);color:var(--green);font-size:14px;cursor:pointer;letter-spacing:2px}
+  .lnk:hover{color:#eef1f5}
+
+  .fld{margin-bottom:1.1rem}
+  .label{font-size:13px;color:var(--g4);letter-spacing:3px;margin-bottom:7px}
+  .inp{width:100%;background:none;border:none;border-bottom:1px solid var(--line2);font-family:var(--mono);
+       font-size:24px;color:var(--txt);caret-color:var(--green);outline:none;padding:5px 0;-webkit-text-fill-color:#eef1f5}
+  .inp::placeholder{color:#5f6675;-webkit-text-fill-color:#5f6675}
+  .half{display:flex;gap:1.2rem} .half>.fld{flex:1;margin-bottom:0}
+
+  .addr{font-size:14px;color:var(--txt2);word-break:break-all;min-height:18px}
+  .addr .hl{color:var(--green)}
+  .row{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--g4);margin:.7rem 0;letter-spacing:1px;flex-wrap:wrap}
+  .tgl{cursor:pointer;color:var(--g5);border:1px solid var(--line2);border-radius:3px;padding:3px 9px}
+  .tgl:hover{color:var(--green)} .tgl.on{color:var(--green);border-color:var(--box)}
+  .vstat{color:var(--g3);font-size:13px}
+
+  .cost{font-size:15px;letter-spacing:1px;margin:1.4rem 0;border-top:1px solid var(--line);padding-top:1rem}
+  .cost div{display:flex;justify-content:space-between;margin:4px 0}
+  .cost div span:first-child{color:var(--g4)}
+  .cost div span:last-child{color:var(--txt2)}
+
+  .cta{width:100%;background:none;border:1px solid var(--box);font-family:var(--mono);color:var(--green);
+       font-size:20px;letter-spacing:3px;padding:12px;cursor:pointer;margin-top:.4rem}
+  .cta:hover:not(:disabled){border-color:var(--green);background:rgba(79,230,160,.05);color:#eef1f5}
+  .cta:disabled{color:var(--g3);cursor:not-allowed}
+  .msg{margin-top:14px;font-size:15px;min-height:18px;letter-spacing:1px;color:var(--g4)}
+  .green{color:var(--green)!important} .red{color:var(--red)!important} .orange{color:var(--orange)!important}
+  .cy{color:var(--cy)!important} .dim{color:var(--g4)!important}
+  a{color:var(--green)}
+
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+  .locked{display:none;color:var(--txt2);font-size:18px;text-align:center;padding:3rem 0;letter-spacing:2px}
+  .boot{color:var(--g4);font-size:16px;text-align:center;padding:3rem 0;letter-spacing:2px;line-height:1.7}
+  .locked a{color:var(--green);cursor:pointer}
+</style>
+<script>
+  /* reveal once VT323 is loaded — no FOUC */
+  (function(){
+    var show=function(){document.documentElement.classList.remove('preload');};
+    if(document.fonts&&document.fonts.ready){document.fonts.ready.then(show);}
+    setTimeout(show,1200);
+  })();
+  /* surface load errors instead of a blank page (e.g. if the CDN is blocked) */
+  function bootErr(t){ var b=document.getElementById('boot'); if(b){ b.style.display='block';
+    b.innerHTML='<span style="color:#ff7a85">'+t+'</span><br><span style="color:#6b7488;font-size:13px">reload, or check your connection</span>'; } }
+  window.addEventListener('error', function(e){ bootErr('couldn’t load: '+(e.message||'script error')); });
+  window.addEventListener('unhandledrejection', function(e){ bootErr('couldn’t load libraries'); });
+  setTimeout(function(){ var b=document.getElementById('boot'); if(b && b.dataset.live!=='1') bootErr('still loading… the CDN may be slow'); }, 8000);
+</script>
+  <link rel="stylesheet" href="cute.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">‹ back</a>
+  <div class="bar">
+    <span class="title">launch</span>
+    <button id="connect" class="lnk" style="display:none">[ connect ]</button>
+  </div>
+
+  <div id="locked" class="locked">log in to launch a coin</div>
+
+  <div id="boot" class="boot">loading…</div>
+
+  <div id="body" style="display:none">
+    <div class="fld">
+      <div class="label">name</div>
+      <input id="name" class="inp" maxlength="32" placeholder="Brotherhood" autocomplete="off">
+    </div>
+
+    <div class="half">
+      <div class="fld">
+        <div class="label">symbol</div>
+        <input id="symbol" class="inp" maxlength="10" placeholder="HOOD" autocomplete="off">
+      </div>
+      <div class="fld">
+        <div class="label">decimals</div>
+        <input id="decimals" class="inp" type="number" min="0" max="9" value="6">
+      </div>
+    </div>
+
+    <div class="fld">
+      <div class="label">total supply</div>
+      <input id="supply" class="inp" type="number" min="1" step="1" value="1000000000">
+    </div>
+
+    <div class="fld">
+      <div class="label">image / metadata uri <span style="color:var(--g3)">(optional)</span></div>
+      <input id="uri" class="inp" style="font-size:18px" placeholder="https://… .json" autocomplete="off">
+    </div>
+
+    <div class="fld">
+      <div class="label">mint address</div>
+      <div id="mintAddr" class="addr">— not generated —</div>
+      <div class="row">
+        <span id="genVanity" class="tgl">grind …hood</span>
+        <span id="genRandom" class="tgl">random</span>
+        <span id="vstat" class="vstat"></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <span id="tglFixed" class="tgl on">fixed supply</span>
+      <span style="color:var(--g3);font-size:13px">renounce mint authority — no more can ever be minted</span>
+    </div>
+
+    <div class="cost">
+      <div><span>network + rent</span><span id="c_rent">~0.012 SOL</span></div>
+      <div><span>launch fee</span><span id="c_fee">—</span></div>
+    </div>
+
+    <button id="launchBtn" class="cta" disabled>[ connect wallet ]</button>
+    <div id="msg" class="msg dim"></div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "@solana/web3.js": "https://esm.sh/@solana/web3.js@1.98.0",
+  "buffer": "https://esm.sh/buffer@6.0.3"
+}}
+</script>
+<script type="module">
+import { Buffer } from 'buffer';
+globalThis.Buffer = globalThis.Buffer || Buffer;
+import {
+  Connection, Keypair, PublicKey, SystemProgram, Transaction,
+  TransactionInstruction, SYSVAR_RENT_PUBKEY, LAMPORTS_PER_SOL, ComputeBudgetProgram
+} from '@solana/web3.js';
+import {
+  MINT_SIZE, TOKEN_PROGRAM_ID, AuthorityType,
+  getMinimumBalanceForRentExemptMint, createInitializeMint2Instruction,
+  getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction,
+  createMintToInstruction, createSetAuthorityInstruction
+} from 'https://esm.sh/@solana/spl-token@0.4.8?external=@solana/web3.js,buffer';
+
+// ── config ───────────────────────────────────────────────────────────────
+const RPC  = 'https://mainnet.helius-rpc.com/?api-key=09fb7d5a-50cb-4b0a-8f9d-db40d1986eb4'; // lock this key to h00d.fun in the Helius dashboard
+const JUP  = 'https://lite-api.jup.ag';
+const SOL_MINT = 'So11111111111111111111111111111111111111112';
+const USDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const VANITY_SUFFIX = 'hood';      // matches case-insensitively (h/H, o, o, d/D)
+
+// ── launch fee (goes to you) ─────────────────────────────────────────────
+//   paste YOUR Solana wallet address below. Empty = no fee charged.
+const FEE_WALLET    = '';          // ← your address, e.g. '5Gw…h00d'
+const LAUNCH_FEE_USD = 2;          // charged in SOL at current price
+const FEE_ON = () => FEE_WALLET.length >= 32;
+
+// ── login gate (same Supabase session h00d.fun stores, same-origin) ──────
+const REQUIRE_LOGIN = true;
+const SB_PROJECT_REF = 'vbkeiyrrujxmavvhtbve';
+function isLoggedIn(){
+  if(!REQUIRE_LOGIN) return true;
+  try{
+    const raw = localStorage.getItem('sb-'+SB_PROJECT_REF+'-auth-token');
+    if(!raw) return false;
+    const t = JSON.parse(raw);
+    const exp = t?.expires_at || t?.currentSession?.expires_at;
+    if(exp && exp*1000 < Date.now()) return false;
+    return !!(t?.access_token || t?.currentSession?.access_token);
+  }catch(e){ return false; }
+}
+
+const TMETA = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
+const connection = new Connection(RPC, 'confirmed');
+const $ = id => document.getElementById(id);
+const msg = (t,c) => { const m=$('msg'); m.className='msg '+(c||'dim'); m.innerHTML=t; };
+
+// ── launch directory (optional) ──────────────────────────────────────────
+// If you paste your Supabase anon key here, every successful launch is recorded
+// to the `launches` table so it shows up on discover.html. Empty = skip (the
+// mint still works either way). The anon key is public-by-design; RLS protects
+// the data. SQL to create the table is in supabase_schema.sql.
+const SB_URL  = 'https://' + SB_PROJECT_REF + '.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZia2VpeXJydWp4bWF2dmh0YnZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTgwNDgsImV4cCI6MjA5Njc3NDA0OH0.eZUC4X-p8qFRT-Ga_xAxAWaOH5WQexEXgtJGul242Fo';
+function accessToken(){
+  try{ const t = JSON.parse(localStorage.getItem('sb-'+SB_PROJECT_REF+'-auth-token'));
+       return t?.access_token || t?.currentSession?.access_token || SB_ANON; }
+  catch(e){ return SB_ANON; }
+}
+async function recordLaunch(row){
+  if(!SB_ANON) return;                       // directory disabled
+  try{
+    await fetch(`${SB_URL}/rest/v1/launches`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'apikey':SB_ANON,
+                'Authorization':'Bearer '+accessToken(), 'Prefer':'return=minimal' },
+      body: JSON.stringify(row),
+    });
+  }catch(e){ /* best-effort: never block the launch */ }
+}
+
+let wallet = null, mintKeypair = null, solUsd = 0, grindAbort = null;
+
+// ── wallet ────────────────────────────────────────────────────────────────
+function provider(){
+  return (window.phantom?.solana?.isPhantom && window.phantom.solana)
+      || (window.solana?.isPhantom && window.solana)
+      || (window.solflare?.isSolflare && window.solflare) || null;
+}
+$('connect').onclick = async () => {
+  const p = provider();
+  if(!p) return msg('no wallet found — install <a href="https://phantom.app" target="_blank">phantom</a>','red');
+  try{
+    const res = await p.connect(); wallet = p;
+    const pk = (res.publicKey||p.publicKey).toString();
+    $('connect').textContent = pk.slice(0,4)+'…'+pk.slice(-4);
+    refreshBtn(); msg('wallet connected','green');
+  }catch(e){ msg('connection cancelled','dim'); }
+};
+
+async function getSolUsd(){
+  try{ const r = await fetch(`${JUP}/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=${USDC}&amount=${10**9}&slippageBps=50`);
+       solUsd = Number((await r.json()).outAmount)/1e6; }catch(e){}
+}
+async function showFee(){
+  if(!FEE_ON()){ $('c_fee').textContent = 'none'; return; }
+  if(!solUsd) await getSolUsd();
+  $('c_fee').textContent = solUsd ? `$${LAUNCH_FEE_USD} ≈ ${(LAUNCH_FEE_USD/solUsd).toFixed(4)} SOL` : `$${LAUNCH_FEE_USD}`;
+}
+async function feeLamports(){
+  if(!FEE_ON()) return 0;
+  if(!solUsd) await getSolUsd();
+  if(!solUsd) return 0;
+  return Math.round(LAUNCH_FEE_USD / solUsd * LAMPORTS_PER_SOL);
+}
+
+// ── vanity grinder (parallel web workers; ed25519 via tweetnacl) ──────────
+const WORKER_SRC = `
+importScripts('https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js');
+const A='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function b58(b){
+  let z=0; while(z<b.length && b[z]===0) z++;
+  const d=[0];
+  for(let i=z;i<b.length;i++){ let c=b[i];
+    for(let j=0;j<d.length;j++){ c+=d[j]<<8; d[j]=c%58; c=(c/58)|0; }
+    while(c>0){ d.push(c%58); c=(c/58)|0; } }
+  let s=''; for(let k=0;k<z;k++) s+='1';
+  for(let q=d.length-1;q>=0;q--) s+=A[d[q]];
+  return s;
+}
+let suffix='${VANITY_SUFFIX}', n=0, running=false;
+onmessage=e=>{
+  if(e.data&&e.data.stop){ running=false; return; }
+  if(e.data&&e.data.suffix){ suffix=e.data.suffix.toLowerCase(); running=true; loop(); }
+};
+function loop(){
+  while(running){
+    const kp=nacl.sign.keyPair();
+    const addr=b58(kp.publicKey); n++;
+    if(addr.toLowerCase().endsWith(suffix)){ postMessage({found:true,secretKey:kp.secretKey,address:addr,n}); running=false; return; }
+    if((n & 1023)===0) postMessage({n});
+    if((n & 8191)===0){ setTimeout(loop,0); return; }   // yield so 'stop' can land
+  }
+}
+`;
+function startGrind(suffix){
+  return new Promise((resolve,reject)=>{
+    const url = URL.createObjectURL(new Blob([WORKER_SRC],{type:'text/javascript'}));
+    const cores = Math.min(navigator.hardwareConcurrency||4, 8);
+    const workers = [], counts = new Array(cores).fill(0);
+    let done = false;
+    const cleanup = () => { workers.forEach(w=>{try{w.postMessage({stop:true});w.terminate();}catch(e){}}); URL.revokeObjectURL(url); };
+    for(let i=0;i<cores;i++){
+      const w = new Worker(url); workers.push(w);
+      w.onmessage = ev => {
+        const d = ev.data;
+        if(d.found){ if(done) return; done=true; cleanup();
+          try{ resolve({keypair: Keypair.fromSecretKey(new Uint8Array(d.secretKey)), address: d.address}); }
+          catch(e){ reject(e); } return; }
+        counts[i] = d.n || counts[i];
+        if(!done) onProgress(counts.reduce((a,b)=>a+b,0));
+      };
+      w.onerror = e => { if(!done){ done=true; cleanup(); reject(e.message||'worker error'); } };
+      w.postMessage({suffix});
+    }
+    grindAbort = () => { if(!done){ done=true; cleanup(); reject(new Error('cancelled')); } };
+  });
+}
+function onProgress(n){ $('vstat').textContent = `${n.toLocaleString()} tried…`; }
+
+function setMint(kp, address){
+  mintKeypair = kp;
+  const a = address, tail = a.slice(0,-VANITY_SUFFIX.length), suf = a.slice(-VANITY_SUFFIX.length);
+  $('mintAddr').innerHTML = `${tail}<span class="hl">${suf}</span>`;
+  refreshBtn();
+}
+
+$('genVanity').onclick = async () => {
+  if(grindAbort){ grindAbort(); grindAbort=null; $('genVanity').classList.remove('on'); $('vstat').textContent='stopped'; return; }
+  $('genVanity').classList.add('on'); $('genRandom').classList.remove('on');
+  $('vstat').textContent='grinding… (this can take ~a minute)'; mintKeypair=null; refreshBtn();
+  try{
+    const {keypair,address} = await startGrind(VANITY_SUFFIX);
+    grindAbort=null; $('vstat').textContent='✓ found';
+    setMint(keypair,address);
+  }catch(e){ grindAbort=null; if(String(e.message||e)!=='cancelled') $('vstat').textContent='grind failed'; }
+};
+$('genRandom').onclick = () => {
+  if(grindAbort){ grindAbort(); grindAbort=null; }
+  $('genVanity').classList.remove('on'); $('genRandom').classList.add('on'); $('vstat').textContent='';
+  const kp = Keypair.generate();
+  setMint(kp, kp.publicKey.toBase58());
+};
+
+$('tglFixed').onclick = () => $('tglFixed').classList.toggle('on');
+$('symbol').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+
+function refreshBtn(){
+  const ready = wallet && mintKeypair && $('name').value.trim() && $('symbol').value.trim();
+  $('launchBtn').disabled = !ready;
+  $('launchBtn').textContent = !wallet ? '[ connect wallet ]'
+    : !mintKeypair ? '[ generate a mint address ]'
+    : !($('name').value.trim() && $('symbol').value.trim()) ? '[ name + symbol required ]'
+    : '[ launch coin ]';
+}
+['name','symbol'].forEach(id => $(id).addEventListener('input', refreshBtn));
+
+// ── metaplex CreateMetadataAccountV3 (hand-built, no heavy deps) ──────────
+function borshStr(s){
+  const b = new TextEncoder().encode(s);
+  const out = new Uint8Array(4+b.length);
+  new DataView(out.buffer).setUint32(0,b.length,true);
+  out.set(b,4); return out;
+}
+function metadataIx(mint, owner, name, symbol, uri){
+  const [pda] = PublicKey.findProgramAddressSync(
+    [new TextEncoder().encode('metadata'), TMETA.toBytes(), mint.toBytes()], TMETA);
+  const u16 = new Uint8Array(2); // sellerFeeBasisPoints = 0
+  const data = Buffer.concat([
+    Buffer.from([33]),                         // CreateMetadataAccountV3
+    Buffer.from(borshStr(name)),
+    Buffer.from(borshStr(symbol)),
+    Buffer.from(borshStr(uri||'')),
+    Buffer.from(u16),
+    Buffer.from([0]),                          // creators: None
+    Buffer.from([0]),                          // collection: None
+    Buffer.from([0]),                          // uses: None
+    Buffer.from([1]),                          // isMutable: true
+    Buffer.from([0]),                          // collectionDetails: None
+  ]);
+  return new TransactionInstruction({
+    programId: TMETA,
+    keys: [
+      { pubkey: pda,                       isSigner:false, isWritable:true  },
+      { pubkey: mint,                      isSigner:false, isWritable:false },
+      { pubkey: owner,                     isSigner:true,  isWritable:false }, // mint authority
+      { pubkey: owner,                     isSigner:true,  isWritable:true  }, // payer
+      { pubkey: owner,                     isSigner:false, isWritable:false }, // update authority
+      { pubkey: SystemProgram.programId,   isSigner:false, isWritable:false },
+      { pubkey: SYSVAR_RENT_PUBKEY,        isSigner:false, isWritable:false },
+    ],
+    data,
+  });
+}
+
+// ── launch ────────────────────────────────────────────────────────────────
+$('launchBtn').onclick = async () => {
+  if(!wallet || !mintKeypair) return;
+  const name = $('name').value.trim(), symbol = $('symbol').value.trim();
+  const decimals = Math.max(0, Math.min(9, parseInt($('decimals').value||'6',10)));
+  const supply = $('supply').value.trim();
+  if(!/^\d+$/.test(supply) || BigInt(supply) <= 0n) return msg('enter a whole-number supply','red');
+  const uri = $('uri').value.trim();
+  const fixed = $('tglFixed').classList.contains('on');
+
+  $('launchBtn').disabled = true;
+  try{
+    msg('building transaction…','dim');
+    const owner = new PublicKey(wallet.publicKey.toString());
+    const mint  = mintKeypair.publicKey;
+    const ata   = getAssociatedTokenAddressSync(mint, owner);
+    const rent  = await getMinimumBalanceForRentExemptMint(connection);
+    const rawAmount = BigInt(supply) * (10n ** BigInt(decimals));
+
+    const ix = [
+      SystemProgram.createAccount({ fromPubkey:owner, newAccountPubkey:mint,
+        lamports:rent, space:MINT_SIZE, programId:TOKEN_PROGRAM_ID }),
+      createInitializeMint2Instruction(mint, decimals, owner, null, TOKEN_PROGRAM_ID),
+      metadataIx(mint, owner, name, symbol, uri),
+      createAssociatedTokenAccountInstruction(owner, ata, owner, mint),
+      createMintToInstruction(mint, ata, owner, rawAmount),
+    ];
+    if(fixed) ix.push(createSetAuthorityInstruction(mint, owner, AuthorityType.MintTokens, null));
+
+    const fee = await feeLamports();
+    if(fee > 0) ix.push(SystemProgram.transfer({ fromPubkey:owner, toPubkey:new PublicKey(FEE_WALLET), lamports:fee }));
+
+    const tx = new Transaction().add(
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100_000 }), // priority fee so the launch lands on busy mainnet
+      ...ix
+    );
+    tx.feePayer = owner;
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.partialSign(mintKeypair);
+
+    msg('approve in your wallet…','cy');
+    const { signature } = await wallet.signAndSendTransaction(tx);
+    msg('confirming…','cy');
+    await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'confirmed');
+
+    const m = mint.toBase58();
+    msg(`✅ <b>${symbol}</b> launched — <a href="https://solscan.io/token/${m}" target="_blank">view ↗</a>`
+       +`<br><span class="dim" style="font-size:13px">${m}</span>`, 'green');
+
+    // best-effort: record to the launch directory (no-op unless SB_ANON is set)
+    recordLaunch({ mint:m, name, symbol, creator:owner.toBase58(),
+      decimals, supply, uri: uri||null, renounced: fixed, sig: signature });
+  }catch(e){
+    msg('launch failed: '+(e.message||e),'red');
+    $('launchBtn').disabled = false;
+  }
+};
+
+// ── gate + boot ────────────────────────────────────────────────────────────
+function applyGate(){
+  const ok = isLoggedIn();
+  const boot = $('boot'); if(boot){ boot.dataset.live='1'; boot.style.display='none'; }
+  $('body').style.display   = ok ? '' : 'none';
+  $('connect').style.display= ok ? '' : 'none';
+  $('locked').style.display = ok ? 'none' : '';
+}
+applyGate();
+window.addEventListener('storage', e => { if(e.key && e.key.includes(SB_PROJECT_REF)) applyGate(); });
+window.addEventListener('load', () => {
+  const p = provider();
+  if(p?.isConnected && p.publicKey){ wallet=p; const pk=p.publicKey.toString();
+    $('connect').textContent = pk.slice(0,4)+'…'+pk.slice(-4); }
+  refreshBtn(); showFee();
+});
+</script>
+</body>
+</html>
