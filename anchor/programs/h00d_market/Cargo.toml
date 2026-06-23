@@ -1,0 +1,27 @@
+[package]
+name = "h00d_market"
+version = "0.1.0"
+description = "h00d.fun — bonding-curve launches + floor-locked P2P market"
+edition = "2021"
+
+# Single source of truth: the program lives at the repo root in program/lib.rs
+# (kept there so it stays visible/linked from the README). We build it from here
+# via this lib path instead of duplicating it. If `anchor build`'s IDL step ever
+# complains about the out-of-tree path, copy program/lib.rs to ./src/lib.rs and
+# delete the `path = ...` line below.
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "h00d_market"
+path = "../../../program/lib.rs"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = "0.30.1"
