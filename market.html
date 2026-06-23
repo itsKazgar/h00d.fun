@@ -84,7 +84,7 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="/">‹ back</a>
+  <a class="back" href="index.html">‹ back</a>
   <div class="bar">
     <span class="title">market</span>
     <button id="connect" class="lnk" style="display:none">[ connect ]</button>
@@ -104,7 +104,7 @@
     </div>
 
     <div class="floorbox">
-      <span>all-time floor</span><span><b id="floorVal">—</b> <span id="floorUnit">◎/coin</span></span>
+      <span>all-time floor</span><span><b id="floorVal">—</b> <span id="floorUnit"><span class="sol"></span>/coin</span></span>
     </div>
 
     <div class="tabs">
@@ -122,7 +122,7 @@
       <div class="row">
         <div class="fld"><div class="label">amount</div>
           <input id="sAmt" class="inp" type="number" min="0" step="any" placeholder="0"></div>
-        <div class="fld"><div class="label">price ◎/coin</div>
+        <div class="fld"><div class="label">price <span class="sol"></span>/coin</div>
           <input id="sPrice" class="inp" type="number" min="0" step="any" placeholder="0.0"></div>
       </div>
       <button id="listBtn" class="cta">[ list for sale ]</button>
@@ -267,7 +267,7 @@ async function loadListings(){
       const coins = Number(l.amount)/(10**decimals);
       const px = toPerCoin(l.price);
       const row = document.createElement('div'); row.className='listing';
-      row.innerHTML = `<span class="px">${px.toLocaleString(undefined,{maximumFractionDigits:9})} ◎</span>`
+      row.innerHTML = `<span class="px">${px.toLocaleString(undefined,{maximumFractionDigits:9})} <span class="sol"></span></span>`
         + `<span class="amt">× ${coins.toLocaleString(undefined,{maximumFractionDigits:4})}</span>`
         + `<span class="who">${l.seller.toBase58().slice(0,4)}…</span>`
         + `<button class="buy">buy</button>`;
@@ -287,7 +287,7 @@ async function loadMine(){
     for(const l of list){
       const coins = Number(l.amount)/(10**decimals);
       const row = document.createElement('div'); row.className='listing';
-      row.innerHTML = `<span class="px">${toPerCoin(l.price).toLocaleString(undefined,{maximumFractionDigits:9})} ◎</span>`
+      row.innerHTML = `<span class="px">${toPerCoin(l.price).toLocaleString(undefined,{maximumFractionDigits:9})} <span class="sol"></span></span>`
         + `<span class="amt">× ${coins.toLocaleString(undefined,{maximumFractionDigits:4})}</span>`
         + `<button class="buy cancel" style="margin-left:auto">cancel</button>`;
       row.querySelector('.cancel').onclick = () => cancelListing(l);
@@ -441,7 +441,7 @@ function renderPreview(){
   const box = $('listings'); box.innerHTML='';
   for(const l of demo){
     const row=document.createElement('div'); row.className='listing';
-    row.innerHTML = `<span class="px">${l.px.toFixed(6)} ◎</span>`
+    row.innerHTML = `<span class="px">${l.px.toFixed(6)} <span class="sol"></span></span>`
       + `<span class="amt">× ${l.amt.toLocaleString()}</span>`
       + `<span class="who">${l.who}…</span><button class="buy">buy</button>`;
     row.querySelector('.buy').onclick=()=>msg('preview only — market goes live once the program is deployed','dim');

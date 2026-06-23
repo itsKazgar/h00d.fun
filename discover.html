@@ -54,7 +54,7 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="/">‹ back</a>
+  <a class="back" href="index.html">‹ back</a>
   <div class="bar">
     <span class="title">discover</span>
     <span class="count" id="count"></span>
@@ -96,7 +96,7 @@ function render(){
   const q = $('search').value.trim().toLowerCase();
   const list = q ? all.filter(t => (t.name||'').toLowerCase().includes(q) || (t.symbol||'').toLowerCase().includes(q)) : all;
   $('count').textContent = all.length ? all.length + (all.length===1?' coin':' coins') : '';
-  if(!all.length){ $('list').innerHTML = '<div class="empty">no launches yet.<br>be the first — hit <a href="/launch.html">mint</a>.</div>'; return; }
+  if(!all.length){ $('list').innerHTML = '<div class="empty">no launches yet.<br>be the first — hit <a href="launch.html">mint</a>.</div>'; return; }
   if(!list.length){ $('list').innerHTML = '<div class="empty">nothing matches “'+esc(q)+'”.</div>'; return; }
 
   $('list').innerHTML = '';
@@ -117,7 +117,7 @@ function render(){
     +   `<span class="sub">${esc(m.slice(0,4))}…${esc(m.slice(-4))} · by ${esc((t.creator||'').slice(0,4))}…</span>`
     + `</span>`
     + `<span class="r"><div class="t">${timeAgo(t.created_at)}</div>`
-    +   `<a class="go" href="/swap.html" onclick="event.stopPropagation()">trade →</a></span>`;
+    +   `<a class="go" href="swap.html" onclick="event.stopPropagation()">trade →</a></span>`;
     $('list').appendChild(a);
   }
 }

@@ -80,7 +80,7 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="/">‹ back</a>
+  <a class="back" href="index.html">‹ back</a>
   <div class="bar">
     <span class="title">curve</span>
     <button id="connect" class="lnk" style="display:none">[ connect ]</button>
@@ -101,10 +101,10 @@
     </div>
 
     <div class="floorbox">
-      <span>price</span><span><b id="priceVal">—</b> ◎/coin</span>
+      <span>price</span><span><b id="priceVal">—</b> <span class="sol"></span>/coin</span>
     </div>
     <div class="floorbox" style="border-top:none;margin-top:-1rem">
-      <span>raised</span><span><b id="raisedVal">—</b> / 85 ◎</span>
+      <span>raised</span><span><b id="raisedVal">—</b> / 85 <span class="sol"></span></span>
     </div>
     <div class="prog"><i id="progBar"></i></div>
 
@@ -124,7 +124,7 @@
       </div>
 
       <div id="buyView">
-        <div class="fld"><div class="label">spend ◎ (SOL)</div>
+        <div class="fld"><div class="label">spend SOL</div>
           <input id="bAmt" class="inp" type="number" min="0" step="any" placeholder="0.0"></div>
         <div id="buyQuote" class="quote"></div>
         <button id="buyBtn" class="cta">[ buy ]</button>
@@ -264,7 +264,7 @@ async function loadCurve(){
     real_token:    readU64(d,96),
     complete:      d[104] !== 0,
   };
-  // price per coin (◎) = v_sol/v_token * 10^decimals / 1e9
+  // price per coin (<span class="sol"></span>) = v_sol/v_token * 10^decimals / 1e9
   const pricePerCoin = Number(curve.virtual_sol) / Number(curve.virtual_token) * Number(pow10(decimals)) / 1e9;
   $('priceVal').textContent = pricePerCoin > 0 ? pricePerCoin.toLocaleString(undefined,{maximumFractionDigits:9}) : '0';
   $('raisedVal').textContent = (Number(curve.real_sol)/1e9).toLocaleString(undefined,{maximumFractionDigits:3});
@@ -305,7 +305,7 @@ function refreshQuotes(){
   $('buyQuote').innerHTML = to ? `≈ <b>${(Number(to)/Number(pow10(decimals))).toLocaleString(undefined,{maximumFractionDigits:4})}</b> coins` : '';
   const s = parseFloat($('sAmt').value);
   const q = (s>0) ? quoteSell(s) : null;
-  $('sellQuote').innerHTML = q ? `≈ <b>${(Number(q.solOut)/1e9).toLocaleString(undefined,{maximumFractionDigits:6})}</b> ◎` : '';
+  $('sellQuote').innerHTML = q ? `≈ <b>${(Number(q.solOut)/1e9).toLocaleString(undefined,{maximumFractionDigits:6})}</b> <span class="sol"></span>` : '';
 }
 
 // ── actions ────────────────────────────────────────────────────────────────

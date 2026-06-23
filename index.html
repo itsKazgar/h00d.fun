@@ -170,19 +170,19 @@
 <div class="page" id="p0">
   <div class="hub">
     <div class="hub-grid">
-      <a class="tile" href="/swap.html">
+      <a class="tile" href="swap.html">
         <span class="tl"><span class="nm">swap</span><span class="ds">trade any solana coin</span></span><span class="arr">→</span>
       </a>
-      <a class="tile" href="/launch.html">
+      <a class="tile" href="launch.html">
         <span class="tl"><span class="nm">mint</span><span class="ds">launch your own coin</span></span><span class="arr">→</span>
       </a>
-      <a class="tile" href="/market.html">
+      <a class="tile" href="market.html">
         <span class="tl"><span class="nm">market</span><span class="ds">floor-locked p2p trading</span></span><span class="arr">→</span>
       </a>
-      <a class="tile" href="/curve.html">
+      <a class="tile" href="curve.html">
         <span class="tl"><span class="nm">curve</span><span class="ds">bonding-curve launches</span></span><span class="arr">→</span>
       </a>
-      <a class="tile" href="/discover.html">
+      <a class="tile" href="discover.html">
         <span class="tl"><span class="nm">discover</span><span class="ds">coins launched here</span></span><span class="arr">→</span>
       </a>
       <a class="tile" onclick="showFeed()">
@@ -206,11 +206,11 @@
       <button class="nav-btn" id="menu-btn" onclick="toggleMenu(event)">[ menu ]</button>
       <div class="menu-drop" id="menu-drop">
         <button class="menu-item" onclick="showHub()">home</button>
-        <button class="menu-item" onclick="location.href='/swap.html'">swap</button>
-        <button class="menu-item" onclick="location.href='/launch.html'">mint</button>
-        <button class="menu-item" onclick="location.href='/market.html'">market</button>
-        <button class="menu-item" onclick="location.href='/curve.html'">curve</button>
-        <button class="menu-item" onclick="location.href='/discover.html'">discover</button>
+        <button class="menu-item" onclick="location.href='swap.html'">swap</button>
+        <button class="menu-item" onclick="location.href='launch.html'">mint</button>
+        <button class="menu-item" onclick="location.href='market.html'">market</button>
+        <button class="menu-item" onclick="location.href='curve.html'">curve</button>
+        <button class="menu-item" onclick="location.href='discover.html'">discover</button>
         <button class="menu-item" onclick="logout()">logout</button>
       </div>
     </div>
@@ -333,7 +333,7 @@
     if (session) {
       currentUser = session.user;
       const { data: profile } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
-      if (profile) { currentUsername = profile.username; showHub(); }
+      if (profile) { currentUsername = profile.username; }  // keep the session, but stay on the ENTER screen — user clicks through (showAuth sends them to the hub)
     }
   }
   init();
@@ -692,14 +692,22 @@
     const input = document.getElementById('dm-input');
     const text = input.value.trim();
     if (!text || !dmPeer) return;
+    input.value = '';
     const { error } = await sb.from('messages').insert({
       sender: currentUsername,
       recipient: dmPeer,
       sender_id: currentUser.id,
       body: text
     });
-    if (error) { return; }
-    input.value = '';
+    if (error) {
+      input.value = text;  // put it back so nothing is lost
+      const box = document.getElementById('dm-thread');
+      const e = document.createElement('div');
+      e.className = 'loading'; e.style.color = '#ff7a85';
+      e.textContent = "couldn't send — " + (error.message || 'is the messages table + RLS set up? run supabase_schema.sql');
+      box.appendChild(e); box.scrollTop = box.scrollHeight;
+      return;
+    }
     loadDm();
   }
 

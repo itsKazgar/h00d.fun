@@ -1,91 +1,122 @@
-/* h00d.fun — cute theme layer.
-   Loaded AFTER each page's inline <style> so it wins the cascade. The friendly
-   minty palette is already set in-page; this file adds the soft rounded shapes,
-   chunky "candy" buttons, gentle shadows and springy motion. Tweak it here to
-   restyle the whole site at once. */
+/* h00d.fun — clipai dashboard theme (dark, JetBrains Mono, bordered panels).
+   A reskin layer loaded after each page's inline styles, so all the existing
+   functionality (feed, DMs, send-SOL, auth, swap/mint/market/curve) keeps
+   working — this only changes the look. */
 
-:root{ --spring:cubic-bezier(.34,1.56,.64,1); --gd:#2bbd7e; --rd:#c9545d; }
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-/* playful backdrop blobs, layered over each page's background colour */
-body{
-  background-image:
-    radial-gradient(55% 45% at 8% 0%, rgba(79,230,160,.10), transparent 70%),
-    radial-gradient(52% 42% at 100% 100%, rgba(255,178,125,.09), transparent 70%) !important;
-  background-attachment: fixed;
+:root{
+  /* tool pages read these vars — remap them to the clipai palette */
+  --bg:#0a0e15; --green:#4a9bff; --txt:#e7ecf5; --txt2:#9aa6bd;
+  --g2:#1b2330; --g3:#586277; --g4:#6a7790; --g5:#56637e;
+  --line:#1b2330; --line2:#232d3d; --box:#2a4a7a;
+  --red:#e5556b; --orange:#d6a53e; --cy:#4ad0e0; --mono:'JetBrains Mono',monospace;
+  /* clipai extras */
+  --panel:#0d1119; --hdr:#0f1420; --brd:#1b2330; --brd2:#232d3d;
+  --blue:#4a9bff; --gold:#d6a53e; --gold-brd:#7d6526; --gn:#41c75e; --label:#6a7790; --muted:#586277;
 }
 
-/* ───────── tool pages: swap · mint · market · curve · discover ───────── */
+*{font-family:'JetBrains Mono',monospace !important}
+html,body{overflow-x:hidden;max-width:100%}
+body{background:#0a0e15 !important;color:#e7ecf5 !important}
 
-/* drop the page content onto a soft rounded card */
-.wrap{ background:#1e2230; border:1px solid #2d3242; border-radius:20px;
-       padding:1.5rem 1.4rem 1.7rem; box-shadow:0 12px 34px rgba(0,0,0,.32); }
+/* ---------- generic links/text accents ---------- */
+a{color:var(--blue) !important}
+.green{color:var(--gn) !important}.red{color:var(--red) !important}.cy{color:var(--cy) !important}
+.dim,.boot,.locked,.soon,.empty,.help{color:var(--muted) !important}
 
-/* rounded inputs with a friendly focus ring */
-.inp{ background:#262b39; border:1px solid #2d3242; border-radius:12px; padding:10px 13px; }
-.inp::placeholder{ color:#5f6675; -webkit-text-fill-color:#5f6675; }
-.inp:focus{ border-color:#4fe6a0; box-shadow:0 0 0 3px rgba(79,230,160,.16); }
+/* ---------- tool pages (swap / mint / market / curve / discover) ---------- */
+.wrap{background:var(--panel) !important;border:1px solid var(--brd) !important;border-radius:10px;
+  padding:1.4rem 1.4rem 1.6rem !important;box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.bar{border-bottom:1px solid var(--brd) !important}
+.title{color:var(--blue) !important;letter-spacing:2px}
+.label{color:var(--label) !important;letter-spacing:1.5px;font-size:11px !important}
+.back{color:var(--muted) !important}.back:hover{color:var(--blue) !important}
 
-/* chunky candy primary button (squishes down on press) */
-.cta{ border:none; border-radius:14px; background:#4fe6a0; color:#0f221a;
-      box-shadow:0 5px 0 var(--gd);
-      transition:transform .12s var(--spring), box-shadow .12s, filter .12s; }
-.cta:hover:not(:disabled){ background:#4fe6a0; color:#0f221a; transform:translateY(-1px); filter:brightness(1.06); }
-.cta:active:not(:disabled){ transform:translateY(5px); box-shadow:0 0 0 var(--gd); }
-.cta:disabled{ background:#262b39; color:#6b7488; box-shadow:none; }
-.cta.sell{ background:#ff7a85; color:#2a0f12; box-shadow:0 5px 0 var(--rd); }
-.cta.sell:hover:not(:disabled){ background:#ff7a85; color:#2a0f12; filter:brightness(1.05); }
+.inp{background:#0a0e16 !important;border:1px solid var(--brd2) !important;border-bottom:1px solid var(--brd2) !important;
+  border-radius:6px !important;color:var(--txt) !important;-webkit-text-fill-color:var(--txt) !important;
+  padding:11px 13px !important;font-size:14px !important}
+.inp::placeholder{color:#454f63 !important;-webkit-text-fill-color:#454f63 !important}
+.inp:focus{border-color:var(--blue) !important;box-shadow:0 0 0 3px rgba(74,155,255,.12)}
 
-/* pill buy / cancel buttons */
-.buy{ border:none; border-radius:999px; background:#4fe6a0; color:#0f221a;
-      box-shadow:0 3px 0 var(--gd); transition:transform .12s var(--spring), box-shadow .12s; }
-.buy:hover{ background:#4fe6a0; color:#0f221a; transform:translateY(-1px); }
-.buy:active{ transform:translateY(3px); box-shadow:0 0 0 var(--gd); }
-.buy.cancel{ background:#2a2f3d; color:#ff7a85; box-shadow:0 3px 0 #20242f; }
-.buy.cancel:hover{ background:#2a2f3d; color:#ff7a85; }
+.cta{background:rgba(74,155,255,.08) !important;border:1px solid var(--blue) !important;color:var(--blue) !important;
+  border-radius:7px !important;letter-spacing:1.5px;font-size:14px !important;padding:12px !important}
+.cta:hover:not(:disabled){background:rgba(74,155,255,.18) !important;color:#cfe3ff !important}
+.cta:disabled{background:#0d1119 !important;border-color:var(--brd2) !important;color:var(--g3) !important}
+.cta.sell{background:rgba(229,85,107,.07) !important;border-color:var(--red) !important;color:var(--red) !important}
 
-/* pill tabs */
-.tab{ border:1px solid #2d3242; background:#262b39; border-radius:999px; padding:5px 16px; }
-.tab.on{ background:rgba(79,230,160,.16); color:#4fe6a0; border-color:#4fe6a0; }
-.tab.on{ border-bottom:1px solid #4fe6a0; }
+.tab{color:var(--muted) !important}.tab.on{color:var(--blue) !important;border-bottom-color:var(--blue) !important}
+.tabs{gap:1.2rem}
+.lnk{color:var(--blue) !important;border:1px solid var(--brd2);border-radius:6px;padding:5px 11px}
+.lnk:hover{border-color:var(--blue);color:#cfe3ff !important}
 
-/* connect chip */
-.lnk{ background:#262b39; border:1px solid #2d3242; border-radius:999px; padding:4px 13px; }
-.lnk:hover{ color:#4fe6a0; border-color:#4fe6a0; }
+.floorbox{background:#0b0f18 !important;border:1px solid var(--brd) !important;border-radius:8px;padding:11px 14px !important;color:var(--label) !important}
+.floorbox b{color:var(--blue) !important}
+.listing{border-bottom:1px solid #141b27 !important}
+.listing .px{color:var(--blue) !important}
+.buy{background:rgba(65,199,94,.08) !important;border:1px solid rgba(65,199,94,.35) !important;color:var(--gn) !important;border-radius:5px}
+.buy:hover{background:var(--gn) !important;color:#06140b !important}
+.cancel{color:var(--red) !important;border-color:rgba(229,85,107,.4) !important}
+.banner{border:1px solid var(--gold-brd) !important;background:rgba(214,165,62,.06) !important;color:var(--gold) !important;border-radius:7px}
+.tgl{border:1px solid var(--brd2) !important;border-radius:999px !important;color:var(--muted) !important}
+.tgl.on{color:var(--blue) !important;border-color:var(--blue) !important}
+.prog{background:#141b27 !important;border-radius:999px !important}.prog>i{background:var(--blue) !important}
+.quote{color:var(--muted) !important}.quote b{color:var(--blue) !important}
+.res:hover{background:#11161f !important}
+.arrow{border-color:var(--brd2) !important;color:var(--muted) !important}.arrow:hover{border-color:var(--blue) !important;color:var(--blue) !important}
+.chip.on,.chip:hover{color:var(--blue) !important}.mini{color:var(--blue) !important}
 
-/* soft rounded rows / boxes */
-.listing{ background:#222634; border:1px solid #2d3242; border-radius:12px; padding:9px 13px; margin-bottom:8px; }
-.floorbox{ background:#222634; border:1px solid #2d3242; border-radius:12px; padding:11px 14px; }
-.banner{ border-radius:10px; }
-.tgl{ border-radius:999px; }                    /* mint toggles */
-.prog{ border-radius:999px; overflow:hidden; }  /* curve progress bar */
-.prog>i{ border-radius:999px; }
-.res{ border-radius:12px; border-bottom:none; padding:9px 11px; }  /* swap search rows */
-.res:hover{ background:#222634; opacity:1; }
+/* the Solana coin icon that replaces the ◎ glyph */
+.sol{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:-2px;
+  background:url('https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png') center/cover;
+  filter:none}
 
-/* ───────── home / feed (index.html) ───────── */
+/* ---------- home / feed / profile / DM (index.html) ---------- */
+#enter-word{color:var(--blue) !important;letter-spacing:8px}.cur-thin,.hub-brand .cur{background:var(--blue) !important}
+.field-label{color:var(--label) !important;letter-spacing:1.5px}
+.err{color:var(--red) !important}
+.auth-toggle{color:var(--muted) !important}.auth-toggle span{color:var(--blue) !important}
+.wallet-hint,.prof-nowallet,.loading,.reply-count{color:var(--muted) !important}
 
-input[type=text], input[type=password], input[type=number], textarea{
-  background:#262b39 !important; border:1px solid #2d3242 !important; border-radius:12px;
-  padding:10px 13px !important; }
-input[type=text]:focus, input[type=password]:focus, input[type=number]:focus, textarea:focus{
-  border-color:#4fe6a0 !important; box-shadow:0 0 0 3px rgba(79,230,160,.16); }
+input[type=text],input[type=password],input[type=number],textarea{
+  background:#0a0e16 !important;border:1px solid var(--brd2) !important;border-radius:6px !important;
+  color:var(--txt) !important;-webkit-text-fill-color:var(--txt) !important;padding:10px 12px !important}
+input::placeholder,textarea::placeholder{color:#454f63 !important;-webkit-text-fill-color:#454f63 !important}
+input:focus,textarea:focus{border-color:var(--blue) !important;box-shadow:0 0 0 3px rgba(74,155,255,.12)}
 
-/* primary actions become candy pills (but not the send-sol method buttons) */
-.action:not(.sol-method){ background:#4fe6a0; color:#0f221a; border-radius:999px; padding:9px 22px;
-  box-shadow:0 4px 0 var(--gd); transition:transform .12s var(--spring), box-shadow .12s, filter .12s; }
-.action:not(.sol-method):hover{ color:#0f221a; transform:translateY(-1px); filter:brightness(1.06); }
-.action:not(.sol-method):active{ transform:translateY(4px); box-shadow:0 0 0 var(--gd); }
+.action{background:rgba(74,155,255,.08) !important;border:1px solid var(--blue) !important;color:var(--blue) !important;
+  border-radius:7px !important;padding:9px 18px !important;letter-spacing:1px}
+.action:hover{background:rgba(74,155,255,.18) !important;color:#cfe3ff !important}
 
-.prof-action{ border-radius:999px; }
-.menu-drop{ border-radius:12px; overflow:hidden; box-shadow:0 12px 30px rgba(0,0,0,.4); }
-.sol-box{ border-radius:18px; box-shadow:0 16px 40px rgba(0,0,0,.45); }
-.sol-method{ border-radius:12px !important; }
-.sol-qr-canvas{ border-radius:14px; }
+.topbar,.prof-head,.feed-wrap,.dm-wrap,.dm-compose{border-color:var(--brd) !important}
+.topbar-user,.prof-name,.p-meta .who,.dm-line .dm-from{color:var(--blue) !important}
+.p-body,.dm-line .dm-text{color:#c2cad8 !important}
+.p-meta,.back-link{color:var(--muted) !important}.back-link:hover{color:var(--blue) !important}
+.nav-btn{color:var(--muted) !important}.nav-btn:hover{color:var(--blue) !important}
+.dm-line.them .dm-from{color:var(--cy) !important}
+.reply{border-left:1px solid var(--brd) !important}
 
-/* hub tiles → cute rounded bounce (overrides the earlier terminal accent style) */
-.tile{ border:1px solid #2d3242 !important; border-radius:14px; padding:14px 18px;
-       transition:transform .2s var(--spring), border-color .2s, background .2s, box-shadow .2s; }
-.tile::before{ display:none; }
-.tile:hover{ border-color:#4fe6a0 !important; background:#20232e; transform:translateY(-3px) scale(1.015);
-             box-shadow:0 10px 22px rgba(79,230,160,.14); }
-.tile:hover .arr{ color:#4fe6a0; transform:translateX(5px); }
+/* hub tiles -> bordered panels */
+.tile{background:var(--panel) !important;border:1px solid var(--brd) !important;border-left:1px solid var(--brd) !important;border-radius:8px !important;padding:14px 16px !important}
+.tile::before{display:none !important}
+.tile:hover{border-color:var(--blue) !important;background:#11161f !important;transform:none !important;box-shadow:none !important}
+.tile .nm{color:var(--blue) !important;letter-spacing:1px}.tile .ds{color:var(--muted) !important}.tile .arr{color:var(--g5) !important}.tile:hover .arr{color:var(--blue) !important}
+.hub-foot{color:var(--muted) !important}.hub-foot .u{color:var(--blue) !important}
+
+.prof-action{border:1px solid var(--brd2) !important;color:var(--blue) !important;border-radius:6px !important}
+.prof-action:hover{border-color:var(--blue) !important;background:rgba(74,155,255,.07) !important}
+.wallet-pay{color:var(--blue) !important}
+
+/* modals + dropdown */
+.sol-box,.menu-drop{background:var(--panel) !important;border:1px solid var(--brd2) !important;border-radius:10px !important;box-shadow:0 20px 50px rgba(0,0,0,.6) !important}
+.sol-box-title{color:var(--blue) !important;letter-spacing:2px}
+.sol-to span,.sol-to{color:var(--muted) !important}.sol-to span{color:var(--blue) !important}
+.sol-method{border:1px solid var(--brd2) !important;border-radius:7px !important;color:var(--blue) !important;background:rgba(74,155,255,.04) !important}
+.sol-method:hover{border-color:var(--blue) !important;background:rgba(74,155,255,.10) !important}
+.sol-warn{border:1px solid var(--gold-brd) !important;background:rgba(214,165,62,.06) !important;color:#c7cedb !important;border-radius:6px}
+.sol-warn b{color:var(--gold) !important}
+.sol-success{color:var(--gn) !important}.sol-err{color:var(--red) !important}.sol-close{color:var(--muted) !important}
+.menu-item{color:#c2cad8 !important}.menu-item:hover{background:rgba(74,155,255,.06) !important;color:var(--blue) !important}
+.menu-item + .menu-item{border-top:1px solid var(--brd) !important}
+
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:999px}
