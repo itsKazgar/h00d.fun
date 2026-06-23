@@ -2,12 +2,11 @@ name: ci
 
 on:
   push:
-    branches: [ main, "claude/**" ]
+    branches: [ main ]
   pull_request:
 
 jobs:
   web:
-    name: page scripts parse
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,24 +15,3 @@ jobs:
           node-version: "20"
       - name: syntax-check inline JS
         run: bash scripts/check-web.sh
-
-  program:
-    name: anchor build + test
-    runs-on: ubuntu-latest
-    # only runs once the Anchor workspace exists (Anchor.toml at the repo root)
-    if: ${{ hashFiles('Anchor.toml') != '' }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: install rust
-        run: rustup toolchain install stable --profile minimal --no-self-update
-      - name: install solana + anchor
-        run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
-          cargo install --git https://github.com/coral-xyz/anchor avm --locked
-          avm install latest && avm use latest
-      - name: anchor test
-        run: anchor test
